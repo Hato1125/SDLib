@@ -1,0 +1,15 @@
+.vs/
+.vscode/
+src/SDLib/obj/
+src/TestApp/obj/
+
+*.exe
+*.dll
+*.pdb
+*.json
+
+!libpng16-16.dll
+!SDL2.dll
+!SDL_image.dll
+!SDL2_mixer.dll
+!SDL_ttf.dll
