@@ -10,6 +10,6 @@ src/TestApp/obj/
 
 !libpng16-16.dll
 !SDL2.dll
-!SDL_image.dll
+!SDL2_image.dll
 !SDL2_mixer.dll
-!SDL_ttf.dll
+!SDL2_ttf.dll
