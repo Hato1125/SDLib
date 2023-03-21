@@ -1,21 +1,13 @@
 ﻿using SDLib;
 
-namespace TestApp
-{
-    internal class Program
-    {
-        static void Main(string[] args)
-        {
-            var app = new Application(
-                "Test",
-                new System.Drawing.Size(100, 100)
-            );
-            app.OnRunning += Draw;
-            app.Run();
-        }
+namespace TestApp;
 
-        private static void Draw(AppTime time, IntPtr renderer)
-        {
-        }
+internal class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        var app = new Application("Test",new(1280, 720));
+        app.Run();
     }
 }
