@@ -10,7 +10,12 @@ namespace TestApp
                 "Test",
                 new System.Drawing.Size(100, 100)
             );
+            app.OnRunning += Draw;
             app.Run();
+        }
+
+        private static void Draw(AppTime time, IntPtr renderer)
+        {
         }
     }
 }

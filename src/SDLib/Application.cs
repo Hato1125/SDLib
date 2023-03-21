@@ -8,12 +8,27 @@ public class Application
 {
     private readonly Stopwatch _totalWatch = new();
     private readonly Stopwatch _deltaWatch = new();
+    private readonly Stopwatch _fpsWatch = new();
+    private double _frameCounter;
 
+    /// <summary>
+    /// アプリケーションの時間
+    /// </summary>
     public readonly AppTime Time = new();
-    public IntPtr WindowPtr { get; private set; }
-    public IntPtr RendererPtr { get; private set; }
-    public SDL.SDL_Event SDLEvent { get; private set; }
 
+    /// <summary>
+    /// Windowのポインタ
+    /// </summary>
+    public IntPtr WindowPtr { get; private set; }
+
+    /// <summary>
+    /// レンダラーのポインタ
+    /// </summary>
+    public IntPtr RendererPtr { get; private set; }
+
+    /// <summary>
+    /// Windowの位置
+    /// </summary>
     public Point WindowPoint
     {
         get
@@ -33,6 +48,9 @@ public class Application
         }
     }
 
+    /// <summary>
+    /// Windowのサイズ
+    /// </summary>
     public Size WindowSize
     {
         get
@@ -52,6 +70,9 @@ public class Application
         }
     }
 
+    /// <summary>
+    /// Windowの最小サイズ
+    /// </summary>
     public Size WindowMinSize
     {
         get
@@ -71,6 +92,9 @@ public class Application
         }
     }
 
+    /// <summary>
+    /// Windowの最大サイズ
+    /// </summary>
     public Size WindowMaxSize
     {
         get
@@ -90,6 +114,9 @@ public class Application
         }
     }
 
+    /// <summary>
+    /// Windowのタイトル
+    /// </summary>
     public string WindowTitle
     {
         get
@@ -108,10 +135,44 @@ public class Application
         }
     }
 
+    /// <summary>
+    /// 最大フレームレート
+    /// </summary>
+    public double MaxFramerate { get; set; }
+
+    /// <summary>
+    /// 一秒に何回更新されるかを取得する
+    /// </summary>
+    public double FramesPerSecond { get; private set; }
+
+    /// <summary>
+    /// 初期化時に呼び出される
+    /// </summary>
     public event Action? OnInit = delegate { };
-    public event Action<AppTime>? OnRunning = delegate { };
+
+    /// <summary>
+    /// イベントが発生した際に呼ばれる
+    /// </summary>
+    public event Action<SDL.SDL_Event>? OnEvent = delegate { };
+
+    /// <summary>
+    /// ループ時に呼び出される
+    /// </summary>
+    public event Action<AppTime, IntPtr>? OnRunning = delegate { };
+
+    /// <summary>
+    /// 終了時に呼び出される
+    /// </summary>
     public event Action? OnQuit = delegate { };
 
+    /// <summary>
+    /// アプリケーションを初期化する
+    /// </summary>
+    /// <param name="windowTitle">タイトル</param>
+    /// <param name="windowSize">サイズ</param>
+    /// <param name="windowPos">位置</param>
+    /// <param name="windowMinSize">最小サイズ</param>
+    /// <param name="windowMaxSize">最大サイズ</param>
     public Application(
         string windowTitle,
         Size windowSize,
@@ -120,6 +181,7 @@ public class Application
         Size? windowMaxSize = null)
     {
         _totalWatch.Start();
+        MaxFramerate = 60;
         InitWindow(windowTitle, windowSize, windowPos);
         InitRenderer();
         InitSDL();
@@ -136,16 +198,21 @@ public class Application
             WindowMaxSize = new(rect.w, rect.h);
     }
 
+    /// <summary>
+    /// アプリケーションを起動する
+    /// </summary>
     public void Run()
     {
         OnInit?.Invoke();
 
+        _fpsWatch.Start();
         bool isRunning = true;
+
         while (isRunning)
         {
             while (SDL.SDL_PollEvent(out SDL.SDL_Event e) == 1)
             {
-                SDLEvent = e;
+                OnEvent?.Invoke(e);
                 if (e.type == SDL.SDL_EventType.SDL_QUIT)
                 {
                     isRunning = false;
@@ -154,16 +221,19 @@ public class Application
             }
 
             SDL.SDL_RenderClear(RendererPtr);
-            OnRunning?.Invoke(Time);
+            OnRunning?.Invoke(Time, RendererPtr);
             SDL.SDL_RenderPresent(RendererPtr);
+            FramerateLimitter();
 
             Time.TotalTime = _totalWatch.Elapsed;
             Time.DeltaTime = _deltaWatch.Elapsed;
             _deltaWatch.Restart();
+            CalclateFps();
         }
 
         _totalWatch.Stop();
         _deltaWatch.Stop();
+        _fpsWatch.Stop();
         OnQuit?.Invoke();
         DestroySDL();
     }
@@ -233,5 +303,30 @@ public class Application
         SDL_image.IMG_Quit();
         SDL_ttf.TTF_Quit();
         SDL_mixer.Mix_Quit();
+    }
+
+    private void FramerateLimitter()
+    {
+        if (MaxFramerate == -1)
+            return;
+
+        double maxFrameMs = 1.0 / MaxFramerate;
+        if (_deltaWatch.Elapsed.TotalSeconds < maxFrameMs)
+        {
+            double sleepMs = (maxFrameMs - _deltaWatch.Elapsed.TotalSeconds) * 1000.0;
+            SDL.SDL_Delay((uint)sleepMs);
+        }
+    }
+
+    private void CalclateFps()
+    {
+        _frameCounter++;
+
+        if (_fpsWatch.Elapsed.TotalSeconds > 1)
+        {
+            FramesPerSecond = _frameCounter;
+            _frameCounter = 0;
+            _fpsWatch.Restart();
+        }
     }
 }
