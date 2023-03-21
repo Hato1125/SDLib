@@ -1,10 +1,16 @@
-﻿namespace TestApp
+﻿using SDLib;
+
+namespace TestApp
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            var app = new Application(
+                "Test",
+                new System.Drawing.Size(100, 100)
+            );
+            app.Run();
         }
     }
 }
