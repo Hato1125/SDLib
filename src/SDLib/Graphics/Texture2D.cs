@@ -17,42 +17,42 @@ public class Texture2D : IDisposable
     private SDL.SDL_FRect _diffDrawRect;
 
     /// <summary>
-    /// ƒAƒ‹ƒtƒ@‚Ìƒ‚ƒbƒh
+    /// ã‚¢ãƒ«ãƒ•ã‚¡ã®ãƒ¢ãƒƒãƒ‰
     /// </summary>
     public byte AlphaMod { get; set; }
 
     /// <summary>
-    /// ‰æ‘œ‚Ì‰ñ“]—¦
+    /// ç”»åƒã®å›è»¢ç‡
     /// </summary>
     public double Rotation { get; set; }
 
     /// <summary>
-    /// •`‰æ‚ÌƒuƒŒƒ“ƒhƒ‚[ƒh
+    /// æç”»æ™‚ã®ãƒ–ãƒ¬ãƒ³ãƒ‰ãƒ¢ãƒ¼ãƒ‰
     /// </summary>
     public SDL.SDL_BlendMode BlendMode { get; set; }
 
     /// <summary>
-    /// •`‰æ‚ÌƒŒƒ“ƒ_[ƒtƒŠƒbƒv
+    /// æç”»æ™‚ã®ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒ•ãƒªãƒƒãƒ—
     /// </summary>
     public SDL.SDL_RendererFlip RenderFlip { get; set; }
 
     /// <summary>
-    /// •`‰æ‚Ì•`‰æŠî€“_
+    /// æç”»æ™‚ã®æç”»åŸºæº–ç‚¹
     /// </summary>
     public ReferencePoint ReferencePoint { get; set; }
 
     /// <summary>
-    /// ‰æ‘œ‚ÌƒXƒP[ƒ‹
+    /// ç”»åƒã®ã‚¹ã‚±ãƒ¼ãƒ«
     /// </summary>
     public Vector2 ImageScale { get; set; }
 
     /// <summary>
-    /// ‰æ‘œ‚ÌƒTƒCƒY
+    /// ç”»åƒã®ã‚µã‚¤ã‚º
     /// </summary>
     public Size ImageSize { get; init; }
 
     /// <summary>
-    /// ƒXƒP[ƒ‹‚ğl—¶‚µ‚½‰æ‘œ‚ÌƒTƒCƒY
+    /// ã‚¹ã‚±ãƒ¼ãƒ«ã‚’è€ƒæ…®ã—ãŸç”»åƒã®ã‚µã‚¤ã‚º
     /// </summary>
     public SizeF ScaleSize
     {
@@ -66,7 +66,7 @@ public class Texture2D : IDisposable
     }
 
     /// <summary>
-    /// Texture2D‚ğ‰Šú‰»‚·‚é
+    /// Texture2Dã‚’åˆæœŸåŒ–ã™ã‚‹
     /// </summary>
     public Texture2D()
     {
@@ -81,13 +81,15 @@ public class Texture2D : IDisposable
         ReferencePoint = ReferencePoint.TopLeft;
         ImageScale = Vector2.One;
         ImageSize = Size.Empty;
+
+        _drawRectPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf<SDL.SDL_FRect>());
     }
 
     /// <summary>
-    /// Texture2D‚ğ‰Šú‰»‚·‚é
+    /// Texture2Dã‚’åˆæœŸåŒ–ã™ã‚‹
     /// </summary>
-    /// <param name="renderer">ƒŒƒ“ƒ_ƒ‰[</param>
-    /// <param name="fileName">ƒtƒ@ƒCƒ‹–¼</param>
+    /// <param name="renderer">ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼</param>
+    /// <param name="fileName">ãƒ•ã‚¡ã‚¤ãƒ«å</param>
     /// <exception cref="Exception"></exception>
     public Texture2D(IntPtr renderer, string fileName)
         : this()
@@ -107,10 +109,10 @@ public class Texture2D : IDisposable
     }
 
     /// <summary>
-    /// Texture2D‚ğ‰Šú‰»‚·‚é
+    /// Texture2Dã‚’åˆæœŸåŒ–ã™ã‚‹
     /// </summary>
-    /// <param name="renderer">ƒŒƒ“ƒ_ƒ‰[</param>
-    /// <param name="surfacePtr">ƒT[ƒtƒFƒX‚Ìƒ|ƒCƒ“ƒ^</param>
+    /// <param name="renderer">ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼</param>
+    /// <param name="surfacePtr">ã‚µãƒ¼ãƒ•ã‚§ã‚¹ã®ãƒã‚¤ãƒ³ã‚¿</param>
     /// <exception cref="Exception"></exception>
     public Texture2D(IntPtr renderer, IntPtr surfacePtr)
         : this()
@@ -127,11 +129,11 @@ public class Texture2D : IDisposable
     }
 
     /// <summary>
-    /// Texture‚ğ@•`‰æ‚·‚é
+    /// Textureã‚’ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã™ã‚‹
     /// </summary>
-    /// <param name="x">XÀ•W</param>
-    /// <param name="y">YÀ•W</param>
-    public void Draw(float x, float y)
+    /// <param name="x">Xåº§æ¨™</param>
+    /// <param name="y">Yåº§æ¨™</param>
+    public void Render(float x, float y)
     {
         var refePoint = CalculateReferencePoint();
         _drawRect.x = x;
@@ -154,20 +156,19 @@ public class Texture2D : IDisposable
     }
 
     /// <summary>
-    /// Surface‚ğæ“¾‚·‚é
+    /// Surfaceã‚’å–å¾—ã™ã‚‹
     /// </summary>
     public SDL.SDL_Surface GetSurface()
         => _surface;
 
     /// <summary>
-    /// Textur‚Ìƒ|ƒCƒ“ƒ^‚ğæ“¾‚·‚é
+    /// Textureã®ãƒã‚¤ãƒ³ã‚¿ã‚’å–å¾—ã™ã‚‹
     /// </summary>
-    /// <returns></returns>
     public IntPtr GetTexture()
         => _texturePtr;
 
     /// <summary>
-    /// Texture2D‚ğ”jŠü‚·‚é
+    /// Texture2Dã‚’ç ´æ£„ã™ã‚‹
     /// </summary>
     public void Dispose()
     {
@@ -186,9 +187,7 @@ public class Texture2D : IDisposable
         {
             Tracer.PrintInfo("Convert drawing information structure to pointer");
 
-            _drawRectPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf<SDL.SDL_FRect>());
             Marshal.StructureToPtr(_drawRect, _drawRectPtr, false);
-
             _diffDrawRect = _drawRect;
         }
     }
