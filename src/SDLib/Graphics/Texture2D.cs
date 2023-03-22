@@ -13,7 +13,6 @@ public class Texture2D : IDisposable
     private readonly IntPtr _rendererPtr;
     private IntPtr _drawRectPtr;
     private SDL.SDL_FRect _drawRect;
-    private SDL.SDL_Rect _imageRect;
     private SDL.SDL_FRect _diffDrawRect;
 
     /// <summary>
@@ -35,6 +34,11 @@ public class Texture2D : IDisposable
     /// 描画時のレンダーフリップ
     /// </summary>
     public SDL.SDL_RendererFlip RenderFlip { get; set; }
+
+    /// <summary>
+    /// 描画時のレクタングル
+    /// </summary>
+    public SDL.SDL_Rect ImageRectangle { get; set; }
 
     /// <summary>
     /// 描画時の描画基準点
@@ -90,11 +94,10 @@ public class Texture2D : IDisposable
     /// </summary>
     /// <param name="renderer">レンダラー</param>
     /// <param name="fileName">ファイル名</param>
-    /// <exception cref="Exception"></exception>
     public Texture2D(IntPtr renderer, string fileName)
         : this()
     {
-        if(renderer == IntPtr.Zero)
+        if (renderer == IntPtr.Zero)
             throw new Exception("An invalid handle was passed.");
 
         _rendererPtr = renderer;
@@ -104,8 +107,8 @@ public class Texture2D : IDisposable
 
         _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, _surfacePtr);
         _surface = Marshal.PtrToStructure<SDL.SDL_Surface>(_surfacePtr);
-        _imageRect = new() { w = _surface.w, h = _surface.h };
         ImageSize = new(_surface.w, _surface.h);
+        ImageRectangle = new() { w = _surface.w, h = _surface.h };
     }
 
     /// <summary>
@@ -113,8 +116,8 @@ public class Texture2D : IDisposable
     /// </summary>
     /// <param name="renderer">レンダラー</param>
     /// <param name="surfacePtr">サーフェスのポインタ</param>
-    /// <exception cref="Exception"></exception>
-    public Texture2D(IntPtr renderer, IntPtr surfacePtr)
+    /// <param name="rect">画像のサイズ</param>
+    public Texture2D(IntPtr renderer, IntPtr surfacePtr, SDL.SDL_Rect? rect = null)
         : this()
     {
         if (renderer == IntPtr.Zero || surfacePtr == IntPtr.Zero)
@@ -124,8 +127,8 @@ public class Texture2D : IDisposable
         _surfacePtr = surfacePtr;
         _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, _surfacePtr);
         _surface = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePtr);
-        _imageRect = new() { w = _surface.w, h = _surface.h };
         ImageSize = new(_surface.w, _surface.h);
+        ImageRectangle = new() { w = _surface.w, h = _surface.h};
     }
 
     /// <summary>
@@ -135,6 +138,7 @@ public class Texture2D : IDisposable
     /// <param name="y">Y座標</param>
     public void Render(float x, float y)
     {
+        var imageRect = ImageRectangle;
         var refePoint = CalculateReferencePoint();
         _drawRect.x = x;
         _drawRect.y = y;
@@ -147,7 +151,7 @@ public class Texture2D : IDisposable
         SDL.SDL_RenderCopyExF(
             _rendererPtr,
             _texturePtr,
-            ref _imageRect,
+            ref imageRect,
             _drawRectPtr,
             Rotation,
             ref refePoint,
@@ -180,7 +184,7 @@ public class Texture2D : IDisposable
 
     private void WatchDrawRectChange()
     {
-        if(_diffDrawRect.x != _drawRect.x
+        if (_diffDrawRect.x != _drawRect.x
             || _diffDrawRect.y != _drawRect.y
             || _diffDrawRect.w != _drawRect.w
             || _diffDrawRect.h != _drawRect.h)
@@ -199,7 +203,7 @@ public class Texture2D : IDisposable
         ReferencePoint.TopRight => new() { x = ImageSize.Width, y = 0 },
         ReferencePoint.CenterLeft => new() { x = 0, y = ImageSize.Height / 2 },
         ReferencePoint.Center => new() { x = ImageSize.Width / 2, y = ImageSize.Height / 2 },
-        ReferencePoint.CenterRight => new() { x = ImageSize.Width,  y =ImageSize.Height / 2},
+        ReferencePoint.CenterRight => new() { x = ImageSize.Width, y = ImageSize.Height / 2 },
         ReferencePoint.BottomLeft => new() { x = 0, y = ImageSize.Height },
         ReferencePoint.BottomCenter => new() { x = ImageSize.Width / 2, y = ImageSize.Height },
         ReferencePoint.BottomRight => new() { x = ImageSize.Width, y = ImageSize.Height },

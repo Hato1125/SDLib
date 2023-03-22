@@ -148,7 +148,7 @@ public class Application
     /// <summary>
     /// 初期化時に呼び出される
     /// </summary>
-    public event Action? OnInit = delegate { };
+    public event Action<IntPtr>? OnInit = delegate { };
 
     /// <summary>
     /// イベントが発生した際に呼ばれる
@@ -203,7 +203,7 @@ public class Application
     /// </summary>
     public void Run()
     {
-        OnInit?.Invoke();
+        OnInit?.Invoke(RendererPtr);
 
         _fpsWatch.Start();
         bool isRunning = true;
