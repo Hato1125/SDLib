@@ -6,8 +6,6 @@ namespace TestApp;
 
 internal class Program
 {
-    private static FontRenderer? font;
-
     [STAThread]
     static void Main()
     {
@@ -20,12 +18,9 @@ internal class Program
 
     private static void Init(IntPtr renderer)
     {
-        var family = new FontFamily($"{AppContext.BaseDirectory}FOT-OedoKtr.otf", 50, 0, Color.White);
-        font = new(renderer, family, "Moji");
     }
 
     private static void Draw(AppTime time, IntPtr renderer)
     {
-        font?.GetTexture()?.Render(200, 200);
     }
 }
