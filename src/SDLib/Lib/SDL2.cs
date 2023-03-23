@@ -5920,7 +5920,7 @@ namespace SDL2
             return (SDL_Keycode)((int)X | SDLK_SCANCODE_MASK);
         }
 
-        public enum SDL_Keycode
+        public enum SDL_Keycode : int
         {
             SDLK_UNKNOWN = 0,
 

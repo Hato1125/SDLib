@@ -10,6 +10,8 @@ public class Application
     private readonly Stopwatch _deltaWatch = new();
     private readonly Stopwatch _fpsWatch = new();
     private double _frameCounter;
+    private bool _isRunning;
+    private SDL.SDL_Event _sdlEvent;
 
     /// <summary>
     /// アプリケーションの時間
@@ -196,6 +198,8 @@ public class Application
             WindowMaxSize = windowMaxSize.Value;
         else
             WindowMaxSize = new(rect.w, rect.h);
+
+        _isRunning = true;
     }
 
     /// <summary>
@@ -206,20 +210,20 @@ public class Application
         OnInit?.Invoke(RendererPtr);
 
         _fpsWatch.Start();
-        bool isRunning = true;
 
-        while (isRunning)
+        while (_isRunning)
         {
             while (SDL.SDL_PollEvent(out SDL.SDL_Event e) == 1)
             {
-                OnEvent?.Invoke(e);
+                _sdlEvent = e;
                 if (e.type == SDL.SDL_EventType.SDL_QUIT)
                 {
-                    isRunning = false;
+                    _isRunning = false;
                     break;
                 }
             }
 
+            OnEvent?.Invoke(_sdlEvent);
             SDL.SDL_RenderClear(RendererPtr);
             OnRunning?.Invoke(Time, RendererPtr);
             SDL.SDL_RenderPresent(RendererPtr);

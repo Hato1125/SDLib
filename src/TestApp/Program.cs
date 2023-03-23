@@ -8,8 +8,6 @@ namespace TestApp;
 
 internal class Program
 {
-    private static SDL.SDL_Event sdlEvent;
-
     [STAThread]
     static void Main()
     {
@@ -23,7 +21,9 @@ internal class Program
 
     private static void Event(SDL.SDL_Event e)
     {
-        sdlEvent = e;
+        Mouse.Update(e);
+        Keyboard.Update();
+
     }
 
     private static void Init(IntPtr renderer)
@@ -32,5 +32,10 @@ internal class Program
 
     private static void Draw(AppTime time, IntPtr renderer)
     {
+        if(Mouse.IsPushed(MouseKey.Left))
+            Console.WriteLine("Push!!");
+
+        if(Keyboard.IsPushed(SDL.SDL_Scancode.SDL_SCANCODE_A))
+            Console.WriteLine("Hello World");
     }
 }
