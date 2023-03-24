@@ -38,7 +38,7 @@ public class Texture2D : IDisposable
     /// <summary>
     /// 描画時のレクタングル
     /// </summary>
-    public SDL.SDL_Rect ImageRectangle { get; set; }
+    public SDL.SDL_Rect ImageRectangle { get; private set; }
 
     /// <summary>
     /// 描画時の描画基準点
@@ -196,7 +196,7 @@ public class Texture2D : IDisposable
         }
     }
 
-    public SDL.SDL_FPoint CalculateReferencePoint() => ReferencePoint switch
+    private SDL.SDL_FPoint CalculateReferencePoint() => ReferencePoint switch
     {
         ReferencePoint.TopLeft => new() { x = 0, y = 0 },
         ReferencePoint.TopCenter => new() { x = ImageSize.Width / 2, y = 0 },

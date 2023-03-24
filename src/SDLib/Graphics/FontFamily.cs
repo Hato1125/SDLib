@@ -15,11 +15,6 @@ public struct FontFamily
     public int FontSize { get; init; }
 
     /// <summary>
-    /// フォントの太さ
-    /// </summary>
-    public int FontWeight { get; init; }
-
-    /// <summary>
     /// フォントの色
     /// </summary>
     public Color FontColor { get; init; }
@@ -29,13 +24,11 @@ public struct FontFamily
     /// </summary>
     /// <param name="fontName">フォント名</param>
     /// <param name="fontSize">フォントサイズ</param>
-    /// <param name="fontWeight">フォントの太さ</param>
     /// <param name="fontColor">フォントの色</param>
-    public FontFamily(string fontName, int fontSize, int fontWeight, Color fontColor)
+    public FontFamily(string fontName, int fontSize, Color? fontColor = null)
     {
         FontName = fontName;
         FontSize = fontSize;
-        FontWeight = fontWeight;
-        FontColor = fontColor;
+        FontColor = fontColor ?? Color.White;
     }
 }
