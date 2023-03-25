@@ -117,18 +117,30 @@ public class Texture2D : IDisposable
     /// <param name="renderer">レンダラー</param>
     /// <param name="surfacePtr">サーフェスのポインタ</param>
     /// <param name="rect">画像のサイズ</param>
-    public Texture2D(IntPtr renderer, IntPtr surfacePtr, SDL.SDL_Rect? rect = null)
+    public Texture2D(IntPtr renderer, IntPtr imagePtr, SetImagePointerType setType, SDL.SDL_Rect? rect = null)
         : this()
     {
-        if (renderer == IntPtr.Zero || surfacePtr == IntPtr.Zero)
+        if (renderer == IntPtr.Zero || imagePtr == IntPtr.Zero)
             throw new Exception("An invalid handle was passed.");
 
         _rendererPtr = renderer;
-        _surfacePtr = surfacePtr;
-        _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, _surfacePtr);
-        _surface = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePtr);
-        ImageSize = new(_surface.w, _surface.h);
-        ImageRectangle = new() { w = _surface.w, h = _surface.h};
+
+        if (setType == SetImagePointerType.SurfacePointer)
+        {
+            _surfacePtr = imagePtr;
+            _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, _surfacePtr);
+        }
+        else
+        {
+            _texturePtr = imagePtr;
+        }
+
+        if (setType == SetImagePointerType.SurfacePointer)
+            _surface = Marshal.PtrToStructure<SDL.SDL_Surface>(imagePtr);
+
+        SDL.SDL_QueryTexture(_texturePtr, out uint _, out int _, out int w, out int h);
+        ImageSize = new(w, h);
+        ImageRectangle = new() { w = w, h = h };
     }
 
     /// <summary>
@@ -222,4 +234,10 @@ public enum ReferencePoint
     BottomLeft,
     BottomCenter,
     BottomRight,
+}
+
+public enum SetImagePointerType
+{
+    SurfacePointer,
+    TexturePointer,
 }

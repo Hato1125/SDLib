@@ -30,10 +30,9 @@ internal class Program
 
     private static void Init(IntPtr renderer)
     {
-        var fontFamily = new FontFamily($"{AppContext.BaseDirectory}x12y16pxMaruMonica.ttf", 50);
+        var fontFamily = new FontFamily($"{AppContext.BaseDirectory}consola.ttf", 50);
         font = new(renderer, fontFamily);
         font.Text = "SDLFontTest";
-        font.ImageScale = new(1.5f, 0.85f);
     }
 
     private static void Draw(AppTime time, IntPtr renderer)
@@ -43,7 +42,7 @@ internal class Program
             if (font != null)
             {
                 font.Text += "A";
-                font.FontFamily = new($"{AppContext.BaseDirectory}x12y16pxMaruMonica.ttf", 40, Color.LightGreen);
+                font.FontFamily = new($"{AppContext.BaseDirectory}consola.ttf", 40, Color.LightGreen);
             }
         }
 

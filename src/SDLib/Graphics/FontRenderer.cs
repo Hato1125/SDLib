@@ -188,7 +188,7 @@ public class FontRenderer : IDisposable
         if (fontPtr == IntPtr.Zero)
             throw new Exception(SDL_ttf.TTF_GetError());
 
-        IntPtr textPtr = SDL_ttf.TTF_RenderUNICODE_Solid(fontPtr, unicodeText, color);
+        IntPtr textPtr = SDL_ttf.TTF_RenderUNICODE_Blended(fontPtr, unicodeText, color);
         if (textPtr == IntPtr.Zero)
             throw new Exception(SDL.SDL_GetError());
 
