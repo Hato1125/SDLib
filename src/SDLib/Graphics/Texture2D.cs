@@ -63,8 +63,8 @@ public class Texture2D : IDisposable
         get
         {
             return new(
-                ImageSize.Width * ScaleSize.Width,
-                ImageSize.Height * ScaleSize.Height
+                ImageSize.Width * ImageScale.X,
+                ImageSize.Height * ImageScale.Y
            );
         }
     }
@@ -152,8 +152,8 @@ public class Texture2D : IDisposable
     {
         var imageRect = ImageRectangle;
         var refePoint = CalculateReferencePoint();
-        _drawRect.x = x;
-        _drawRect.y = y;
+        _drawRect.x = x - refePoint.x;
+        _drawRect.y = y - refePoint.y;
         _drawRect.w = ImageSize.Width * ImageScale.X;
         _drawRect.h = ImageSize.Height * ImageScale.Y;
 
@@ -214,7 +214,7 @@ public class Texture2D : IDisposable
         ReferencePoint.TopCenter => new() { x = ImageSize.Width / 2, y = 0 },
         ReferencePoint.TopRight => new() { x = ImageSize.Width, y = 0 },
         ReferencePoint.CenterLeft => new() { x = 0, y = ImageSize.Height / 2 },
-        ReferencePoint.Center => new() { x = ImageSize.Width / 2, y = ImageSize.Height / 2 },
+        ReferencePoint.Center => new() { x = ScaleSize.Width / 2, y = ScaleSize.Height / 2 },
         ReferencePoint.CenterRight => new() { x = ImageSize.Width, y = ImageSize.Height / 2 },
         ReferencePoint.BottomLeft => new() { x = 0, y = ImageSize.Height },
         ReferencePoint.BottomCenter => new() { x = ImageSize.Width / 2, y = ImageSize.Height },

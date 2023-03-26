@@ -64,6 +64,20 @@ public class FontRenderer : IDisposable
     public Size ImageSize { get; private set; }
 
     /// <summary>
+    /// スケールを考慮した画像のサイズ
+    /// </summary>
+    public SizeF ScaleSize
+    {
+        get
+        {
+            return new(
+                ImageSize.Width * ImageScale.X,
+                ImageSize.Height * ImageScale.Y
+           );
+        }
+    }
+
+    /// <summary>
     /// FontRendererを初期化する
     /// </summary>
     public FontRenderer()
