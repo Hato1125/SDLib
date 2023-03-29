@@ -12,11 +12,8 @@ public class Application
     private double _frameCounter;
     private bool _isRunning;
     private SDL.SDL_Event _sdlEvent;
-
-    /// <summary>
-    /// アプリケーションの時間
-    /// </summary>
-    public readonly AppTime Time = new();
+    private AppInfo _appInfo;
+    private AppTime _appTime;
 
     /// <summary>
     /// Windowのポインタ
@@ -150,22 +147,22 @@ public class Application
     /// <summary>
     /// 初期化時に呼び出される
     /// </summary>
-    public event Action<IntPtr>? OnInit = delegate { };
+    public event Action<AppInfo>? OnInit = delegate { };
 
     /// <summary>
     /// イベントが発生した際に呼ばれる
     /// </summary>
-    public event Action<SDL.SDL_Event>? OnEvent = delegate { };
+    public event Action<SDL.SDL_Event, AppInfo>? OnEvent = delegate { };
 
     /// <summary>
     /// ループ時に呼び出される
     /// </summary>
-    public event Action<AppTime, IntPtr>? OnRunning = delegate { };
+    public event Action<AppTime, AppInfo>? OnRunning = delegate { };
 
     /// <summary>
     /// 終了時に呼び出される
     /// </summary>
-    public event Action? OnQuit = delegate { };
+    public event Action<AppInfo>? OnQuit = delegate { };
 
     /// <summary>
     /// アプリケーションを初期化する
@@ -207,7 +204,7 @@ public class Application
     /// </summary>
     public void Run()
     {
-        OnInit?.Invoke(RendererPtr);
+        OnInit?.Invoke(_appInfo);
 
         _fpsWatch.Start();
 
@@ -223,14 +220,14 @@ public class Application
                 }
             }
 
-            OnEvent?.Invoke(_sdlEvent);
+            OnEvent?.Invoke(_sdlEvent, _appInfo);
             SDL.SDL_RenderClear(RendererPtr);
-            OnRunning?.Invoke(Time, RendererPtr);
+            OnRunning?.Invoke(_appTime, _appInfo);
             SDL.SDL_RenderPresent(RendererPtr);
             FramerateLimitter();
 
-            Time.TotalTime = _totalWatch.Elapsed;
-            Time.DeltaTime = _deltaWatch.Elapsed;
+            _appTime.TotalTime = _totalWatch.Elapsed;
+            _appTime.DeltaTime = _deltaWatch.Elapsed;
             _deltaWatch.Restart();
             CalclateFps();
         }
@@ -238,7 +235,7 @@ public class Application
         _totalWatch.Stop();
         _deltaWatch.Stop();
         _fpsWatch.Stop();
-        OnQuit?.Invoke();
+        OnQuit?.Invoke(_appInfo);
         DestroySDL();
     }
 
@@ -258,11 +255,12 @@ public class Application
             size.Width,
             size.Height,
             SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN
-            | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE
         );
 
         if (WindowPtr == IntPtr.Zero)
             throw new Exception(SDL.SDL_GetError());
+
+        _appInfo.WindowPtr = WindowPtr;
     }
 
     private void InitRenderer()
@@ -278,6 +276,8 @@ public class Application
 
         if (RendererPtr == IntPtr.Zero)
             throw new Exception(SDL.SDL_GetError());
+
+        _appInfo.RendererPtr = RendererPtr;
     }
 
     private void InitSDL()

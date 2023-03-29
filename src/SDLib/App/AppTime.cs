@@ -1,6 +1,6 @@
 namespace SDLib;
 
-public class AppTime
+public struct AppTime
 {
     /// <summary>
     /// 起動してからの時間

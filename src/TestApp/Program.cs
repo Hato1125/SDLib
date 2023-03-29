@@ -13,39 +13,5 @@ internal class Program
     [STAThread]
     static void Main()
     {
-        var app = new Application("Test", new(1280, 720));
-
-        app.OnInit += Init;
-        app.OnEvent += Event;
-        app.OnRunning += Draw;
-        app.Run();
-    }
-
-    private static void Event(SDL.SDL_Event e)
-    {
-        Mouse.Update(e);
-        Keyboard.Update();
-
-    }
-
-    private static void Init(IntPtr renderer)
-    {
-        var fontFamily = new FontFamily($"{AppContext.BaseDirectory}consola.ttf", 50);
-        font = new(renderer, fontFamily);
-        font.Text = "SDLFontTest";
-    }
-
-    private static void Draw(AppTime time, IntPtr renderer)
-    {
-        if (Mouse.IsPushed(MouseKey.Left))
-        {
-            if (font != null)
-            {
-                font.Text += "A";
-                font.FontFamily = new($"{AppContext.BaseDirectory}consola.ttf", 40, Color.LightGreen);
-            }
-        }
-
-        font?.Draw(100, 100);
     }
 }
