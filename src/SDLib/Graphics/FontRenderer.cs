@@ -53,7 +53,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
     /// <summary>
     /// フォントをレンダリングする
     /// </summary>
-    public FontRenderer Render()
+    public Texture2D Render()
     {
         // フォントファミリーのパラメーターが変更されたら再度作り直す
         if (_isFastCreate
@@ -69,7 +69,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
             _bufferFamily = FontFamily;
         }
 
-        return this;
+        return _texture;
     }
 
     /// <summary>
@@ -85,6 +85,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
     public void Dispose()
     {
         _texture.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void CreateFontTexture()

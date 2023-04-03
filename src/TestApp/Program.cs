@@ -41,9 +41,13 @@ internal class Program
         SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "2");
         bool isRunning = true;
 
+        TextureArea area = new(_renderPtr, 4000, 2000);
+
+        var family = new FontFamily($"{AppContext.BaseDirectory}07やさしさゴシックボールド.ttf", 40, Color.Black);
+        FontRenderer font = new(_renderPtr, family);
+        font.Text = "これはきゅうくらりんです";
+
         Texture2D nachyo = new(_renderPtr, $"{AppContext.BaseDirectory}natyo.png");
-        nachyo.WidthScale = 0.35f;
-        nachyo.HeightScale = 0.35f;
 
         while (isRunning)
         {
@@ -57,7 +61,14 @@ internal class Program
             SDL.SDL_SetRenderDrawColor(_renderPtr, 255, 255, 255, 255);
             SDL.SDL_RenderClear(_renderPtr);
 
-            nachyo.Render(0, 0);
+            area.Render(() =>
+            {
+                for (int i = 0; i < 50; i++)
+                    for (int j = 0; j < 30; j++)
+                        nachyo.Render(i * 120, j * 120);
+
+                //font.Render().Render(20, 300);
+            }).Render(0, 0);
 
             SDL.SDL_RenderPresent(_renderPtr);
         }

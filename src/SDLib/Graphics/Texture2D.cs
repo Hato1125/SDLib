@@ -77,6 +77,8 @@ public class Texture2D : ITextureReturnable, IDisposable
     {
         _surfacePtr = IntPtr.Zero;
         _texturePtr = IntPtr.Zero;
+        WidthScale = 1f;
+        HeightScale = 1f;
         AlphaMod = byte.MaxValue;
         Rotation = 0;
         Brightness = Color.White;
@@ -160,8 +162,15 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// サーフェスポインタを取得する
     /// </summary>
     /// <returns>サーフェスポインタ</returns>
-    public IntPtr GetSurface()
+    public IntPtr GetSurfacePtr()
         => _surfacePtr;
+
+    /// <summary>
+    /// テクスチャポインタを取得する
+    /// </summary>
+    /// <returns>テクスチャポインタ</returns>
+    public IntPtr GetTexturePtr()
+        => _texturePtr;
 
     /// <summary>
     /// Textureを取得する
