@@ -1,19 +1,44 @@
 using System.Drawing;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using SDL2;
 
 namespace SDLib.Graphics;
 
 public class Texture2D : ITextureReturnable, IDisposable
 {
-    private readonly SDL.SDL_Surface _surface;
-    private readonly IntPtr _surfacePtr;
-    private readonly IntPtr _texturePtr;
     private readonly IntPtr _rendererPtr;
-    private IntPtr _drawRectPtr;
-    private SDL.SDL_FRect _drawRect;
-    private SDL.SDL_FRect _diffDrawRect;
+    private IntPtr _surfacePtr;
+    private IntPtr _texturePtr;
+    private SDL.SDL_FRect _renderRect;
+
+    /// <summary>
+    /// 画像の横幅
+    /// </summary>
+    public int Width { get; private set; }
+
+    /// <summary>
+    /// 画像の高さ
+    /// </summary>
+    public int Height { get; private set; }
+
+    /// <summary>
+    /// 横幅のスケール
+    /// </summary>
+    public float WidthScale { get; set; }
+
+    /// <summary>
+    /// 高さのスケール
+    /// </summary>
+    public float HeightScale { get; set; }
+
+    /// <summary>
+    /// 実際の画像の横幅
+    /// </summary>
+    public float ActualWidth { get => Width * WidthScale; }
+
+    /// <summary>
+    /// 実際の画像の高さ
+    /// </summary>
+    public float ActualHeight { get => Height * HeightScale; }
 
     /// <summary>
     /// アルファのモッド
@@ -26,6 +51,16 @@ public class Texture2D : ITextureReturnable, IDisposable
     public double Rotation { get; set; }
 
     /// <summary>
+    /// 描画時の画像の輝度
+    /// </summary>
+    public Color Brightness { get; set; }
+
+    /// <summary>
+    /// 回転時の描画基準点
+    /// </summary>
+    public RotationPoint RotationPoint { get; set; }
+
+    /// <summary>
     /// 描画時のブレンドモード
     /// </summary>
     public SDL.SDL_BlendMode BlendMode { get; set; }
@@ -36,57 +71,18 @@ public class Texture2D : ITextureReturnable, IDisposable
     public SDL.SDL_RendererFlip RenderFlip { get; set; }
 
     /// <summary>
-    /// 描画時のレクタングル
-    /// </summary>
-    public SDL.SDL_Rect ImageRectangle { get; private set; }
-
-    /// <summary>
-    /// 描画時の描画基準点
-    /// </summary>
-    public ReferencePoint ReferencePoint { get; set; }
-
-    /// <summary>
-    /// 画像のスケール
-    /// </summary>
-    public Vector2 ImageScale { get; set; }
-
-    /// <summary>
-    /// 画像のサイズ
-    /// </summary>
-    public Size ImageSize { get; init; }
-
-    /// <summary>
-    /// スケールを考慮した画像のサイズ
-    /// </summary>
-    public SizeF ScaleSize
-    {
-        get
-        {
-            return new(
-                ImageSize.Width * ImageScale.X,
-                ImageSize.Height * ImageScale.Y
-           );
-        }
-    }
-
-    /// <summary>
     /// Texture2Dを初期化する
     /// </summary>
     public Texture2D()
     {
         _surfacePtr = IntPtr.Zero;
         _texturePtr = IntPtr.Zero;
-        _rendererPtr = IntPtr.Zero;
-        _drawRectPtr = IntPtr.Zero;
         AlphaMod = byte.MaxValue;
-        Rotation = 0.0;
+        Rotation = 0;
+        Brightness = Color.White;
+        RotationPoint = RotationPoint.TopLeft;
         BlendMode = SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND;
         RenderFlip = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-        ReferencePoint = ReferencePoint.TopLeft;
-        ImageScale = Vector2.One;
-        ImageSize = Size.Empty;
-
-        _drawRectPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf<SDL.SDL_FRect>());
     }
 
     /// <summary>
@@ -100,15 +96,16 @@ public class Texture2D : ITextureReturnable, IDisposable
         if (renderer == IntPtr.Zero)
             throw new Exception("An invalid handle was passed.");
 
-        _rendererPtr = renderer;
         _surfacePtr = SDL_image.IMG_Load(fileName);
         if (_surfacePtr == IntPtr.Zero)
             throw new Exception(SDL_image.IMG_GetError());
 
+        _rendererPtr = renderer;
         _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, _surfacePtr);
-        _surface = Marshal.PtrToStructure<SDL.SDL_Surface>(_surfacePtr);
-        ImageSize = new(_surface.w, _surface.h);
-        ImageRectangle = new() { w = _surface.w, h = _surface.h };
+
+        SDL.SDL_QueryTexture(_texturePtr, out uint _, out int _, out int w, out int h);
+        Width = w;
+        Height = h;
     }
 
     /// <summary>
@@ -117,31 +114,30 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// <param name="renderer">レンダラー</param>
     /// <param name="surfacePtr">サーフェスのポインタ</param>
     /// <param name="rect">画像のサイズ</param>
-    public Texture2D(IntPtr renderer, IntPtr imagePtr, SetImagePointerType setType, SDL.SDL_Rect? rect = null)
+    public Texture2D(IntPtr renderer, IntPtr imagePtr, bool isTexture)
         : this()
     {
-        if (renderer == IntPtr.Zero || imagePtr == IntPtr.Zero)
-            throw new Exception("An invalid handle was passed.");
+        if (renderer != IntPtr.Zero || imagePtr != IntPtr.Zero)
+            throw new ArgumentException("An invalid argument was passed.");
 
-        _rendererPtr = renderer;
-
-        if (setType == SetImagePointerType.SurfacePointer)
-        {
-            _surfacePtr = imagePtr;
-            _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, _surfacePtr);
-        }
-        else
+        if (isTexture)
         {
             _texturePtr = imagePtr;
         }
+        else
+        {
+            _surfacePtr = imagePtr;
+            _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, imagePtr);
+        }
 
-        if (setType == SetImagePointerType.SurfacePointer)
-            _surface = Marshal.PtrToStructure<SDL.SDL_Surface>(imagePtr);
+        _rendererPtr = renderer;
 
         SDL.SDL_QueryTexture(_texturePtr, out uint _, out int _, out int w, out int h);
-        ImageSize = new(w, h);
-        ImageRectangle = new() { w = w, h = h };
+        Width = w;
+        Height = h;
     }
+
+    ~Texture2D() => Dispose();
 
     /// <summary>
     /// Textureをレンダリングする
@@ -150,30 +146,22 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// <param name="y">Y座標</param>
     public void Render(float x, float y)
     {
-        var imageRect = ImageRectangle;
-        var refePoint = CalculateReferencePoint();
-        _drawRect.x = x - refePoint.x;
-        _drawRect.y = y - refePoint.y;
-        _drawRect.w = ImageSize.Width * ImageScale.X;
-        _drawRect.h = ImageSize.Height * ImageScale.Y;
+        var refePoint = CalculateRotationPoint();
+        _renderRect.x = x - refePoint.x;
+        _renderRect.y = y - refePoint.y;
+        _renderRect.w = Width * WidthScale;
+        _renderRect.h = Height * HeightScale;
 
-        WatchDrawRectChange();
         SDL.SDL_SetTextureBlendMode(_texturePtr, BlendMode);
         SDL.SDL_SetTextureAlphaMod(_texturePtr, AlphaMod);
-        SDL.SDL_RenderCopyExF(
-            _rendererPtr,
-            _texturePtr,
-            IntPtr.Zero,
-            _drawRectPtr,
-            Rotation,
-            ref refePoint,
-            RenderFlip
-        );
+        SDL.SDL_SetTextureColorMod(_texturePtr, Brightness.R, Brightness.G, Brightness.B);
+        SDL.SDL_RenderCopyExF(_rendererPtr, _texturePtr, IntPtr.Zero, ref _renderRect, Rotation, ref refePoint, RenderFlip);
     }
 
     /// <summary>
-    /// Surfaceを取得する
+    /// サーフェスポインタを取得する
     /// </summary>
+    /// <returns>サーフェスポインタ</returns>
     public IntPtr GetSurface()
         => _surfacePtr;
 
@@ -189,40 +177,37 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// </summary>
     public void Dispose()
     {
-        SDL.SDL_DestroyTexture(_texturePtr);
-        SDL.SDL_FreeSurface(_surfacePtr);
-        Marshal.FreeCoTaskMem(_drawRectPtr);
+        if (_texturePtr != IntPtr.Zero)
+        {
+            SDL.SDL_DestroyTexture(_texturePtr);
+            _texturePtr = IntPtr.Zero;
+        }
+
+        if (_surfacePtr != IntPtr.Zero)
+        {
+            SDL.SDL_FreeSurface(_surfacePtr);
+            _surfacePtr = IntPtr.Zero;
+        }
+
         GC.SuppressFinalize(this);
     }
 
-    private void WatchDrawRectChange()
+    private SDL.SDL_FPoint CalculateRotationPoint() => RotationPoint switch
     {
-        if (_diffDrawRect.x != _drawRect.x
-            || _diffDrawRect.y != _drawRect.y
-            || _diffDrawRect.w != _drawRect.w
-            || _diffDrawRect.h != _drawRect.h)
-        {
-            Marshal.StructureToPtr(_drawRect, _drawRectPtr, false);
-            _diffDrawRect = _drawRect;
-        }
-    }
-
-    private SDL.SDL_FPoint CalculateReferencePoint() => ReferencePoint switch
-    {
-        ReferencePoint.TopLeft => new() { x = 0, y = 0 },
-        ReferencePoint.TopCenter => new() { x = ImageSize.Width / 2, y = 0 },
-        ReferencePoint.TopRight => new() { x = ImageSize.Width, y = 0 },
-        ReferencePoint.CenterLeft => new() { x = 0, y = ImageSize.Height / 2 },
-        ReferencePoint.Center => new() { x = ScaleSize.Width / 2, y = ScaleSize.Height / 2 },
-        ReferencePoint.CenterRight => new() { x = ImageSize.Width, y = ImageSize.Height / 2 },
-        ReferencePoint.BottomLeft => new() { x = 0, y = ImageSize.Height },
-        ReferencePoint.BottomCenter => new() { x = ImageSize.Width / 2, y = ImageSize.Height },
-        ReferencePoint.BottomRight => new() { x = ImageSize.Width, y = ImageSize.Height },
+        RotationPoint.TopLeft => new() { x = 0, y = 0 },
+        RotationPoint.TopCenter => new() { x = Width / 2, y = 0 },
+        RotationPoint.TopRight => new() { x = Width, y = 0 },
+        RotationPoint.CenterLeft => new() { x = 0, y = Height / 2 },
+        RotationPoint.Center => new() { x = Width / 2, y = Height / 2 },
+        RotationPoint.CenterRight => new() { x = Width, y = Height / 2 },
+        RotationPoint.BottomLeft => new() { x = 0, y = Height },
+        RotationPoint.BottomCenter => new() { x = Width / 2, y = Height },
+        RotationPoint.BottomRight => new() { x = Width, y = Height },
         _ => new() { x = 0, y = 0 }
     };
 }
 
-public enum ReferencePoint
+public enum RotationPoint
 {
     TopLeft,
     TopCenter,
@@ -233,10 +218,4 @@ public enum ReferencePoint
     BottomLeft,
     BottomCenter,
     BottomRight,
-}
-
-public enum SetImagePointerType
-{
-    SurfacePointer,
-    TexturePointer,
 }

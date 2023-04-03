@@ -125,7 +125,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
         var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(textPtr);
 
         _textTexturePtr = SDL.SDL_CreateTextureFromSurface(_rendererPtr, textPtr);
-        _texture = new(_rendererPtr, _textTexturePtr, SetImagePointerType.TexturePointer);
+        _texture = new(_rendererPtr, _textTexturePtr, true);
 
         // フォントとサーフェスの破棄
         SDL_ttf.TTF_CloseFont(fontPtr);
