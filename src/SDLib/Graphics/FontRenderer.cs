@@ -1,7 +1,4 @@
-using System.Drawing;
-using System.Numerics;
 using System.Text;
-using System.Runtime.InteropServices;
 using SDL2;
 
 namespace SDLib.Graphics;
@@ -9,13 +6,10 @@ namespace SDLib.Graphics;
 public class FontRenderer : ITextureReturnable, IDisposable
 {
     private IntPtr _rendererPtr;
-    private IntPtr _textTexturePtr;
-    private IntPtr _renderRectPtr;
-    private SDL.SDL_FRect _bufferRenderRect;
-    private FontFamily _bufferFontFamily;
     private Texture2D _texture;
-    private bool _isFastCreate;
+    private FontFamily _bufferFamily;
     private string _bufferText;
+    private bool _isFastCreate;
 
     /// <summary>
     /// フォントファミリー
@@ -32,15 +26,13 @@ public class FontRenderer : ITextureReturnable, IDisposable
     /// </summary>
     public FontRenderer()
     {
-        _rendererPtr = IntPtr.Zero;
-        _textTexturePtr = IntPtr.Zero;
-        _texture = new();
         _isFastCreate = true;
+        _rendererPtr = IntPtr.Zero;
         _bufferText = string.Empty;
+        _texture = new();
+        _bufferFamily = new();
+        FontFamily = new();
         Text = string.Empty;
-        FontFamily = new(string.Empty, 0);
-
-        _renderRectPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf<SDL.SDL_Rect>());
     }
 
     /// <summary>
@@ -59,22 +51,25 @@ public class FontRenderer : ITextureReturnable, IDisposable
     }
 
     /// <summary>
-    /// フォントレンダラーを更新する
+    /// フォントをレンダリングする
     /// </summary>
-    public void Update()
+    public FontRenderer Render()
     {
+        // フォントファミリーのパラメーターが変更されたら再度作り直す
         if (_isFastCreate
-            || Text != _bufferText
-            || FontFamily.FontName != _bufferFontFamily.FontName
-            || FontFamily.FontSize != _bufferFontFamily.FontSize
-            || FontFamily.FontColor != _bufferFontFamily.FontColor)
+            ||Text != _bufferText
+            || FontFamily.FontName != _bufferFamily.FontName
+            || FontFamily.FontSize != _bufferFamily.FontSize
+            || FontFamily.FontColor != _bufferFamily.FontColor)
         {
             CreateFontTexture();
 
             _isFastCreate = false;
             _bufferText = Text;
-            _bufferFontFamily = FontFamily;
+            _bufferFamily = FontFamily;
         }
+
+        return this;
     }
 
     /// <summary>
@@ -89,8 +84,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
     /// </summary>
     public void Dispose()
     {
-        SDL.SDL_DestroyTexture(_textTexturePtr);
-        Marshal.FreeCoTaskMem(_renderRectPtr);
+        _texture.Dispose();
     }
 
     private void CreateFontTexture()
@@ -98,41 +92,29 @@ public class FontRenderer : ITextureReturnable, IDisposable
         if (string.IsNullOrWhiteSpace(Text))
             return;
 
-        Tracer.PrintInfo("Create font texture.");
-
-        // 文字をUnicodeに直す
-        byte[] unicodeBytes = Encoding.Unicode.GetBytes(Text);
-        string unicodeText = Encoding.Unicode.GetString(unicodeBytes);
-
-        var color = new SDL.SDL_Color()
+        byte[] unicodeByte = Encoding.Unicode.GetBytes(Text);
+        string unicodeText = Encoding.Unicode.GetString(unicodeByte);
+        var textColor = new SDL.SDL_Color()
         {
             r = FontFamily.FontColor.R,
             g = FontFamily.FontColor.G,
-            b = FontFamily.FontColor.B,
+            b = FontFamily.FontColor.B
         };
 
-        // フォントと文字のサーフェスの作成
-        IntPtr nowTexturePtr = _textTexturePtr;
-
-        IntPtr fontPtr = SDL_ttf.TTF_OpenFont(FontFamily.FontName, FontFamily.FontSize);
-        if (fontPtr == IntPtr.Zero)
+        // フォントを開く
+        var font = SDL_ttf.TTF_OpenFont(FontFamily.FontName, FontFamily.FontSize);
+        if (font == IntPtr.Zero)
             throw new Exception(SDL_ttf.TTF_GetError());
 
-        IntPtr textPtr = SDL_ttf.TTF_RenderUNICODE_Blended(fontPtr, unicodeText, color);
-        if (textPtr == IntPtr.Zero)
-            throw new Exception(SDL.SDL_GetError());
+        // サーフェスの作成
+        var surface = SDL_ttf.TTF_RenderUNICODE_Blended(font, unicodeText, textColor);
+        if (surface == IntPtr.Zero)
+            throw new Exception(SDL_ttf.TTF_GetError());
 
-        var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(textPtr);
+        _texture.Dispose();
+        _texture = new(_rendererPtr, surface, false);
 
-        _textTexturePtr = SDL.SDL_CreateTextureFromSurface(_rendererPtr, textPtr);
-        _texture = new(_rendererPtr, _textTexturePtr, true);
-
-        // フォントとサーフェスの破棄
-        SDL_ttf.TTF_CloseFont(fontPtr);
-        SDL.SDL_FreeSurface(textPtr);
-
-        // テクスチャが正しく設定されていない可能性があるので同じじゃないかを判定する
-        if (_textTexturePtr != nowTexturePtr)
-            SDL.SDL_DestroyTexture(nowTexturePtr);
+        SDL_ttf.TTF_CloseFont(font);
+        SDL.SDL_FreeSurface(surface);
     }
 }

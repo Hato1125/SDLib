@@ -104,8 +104,7 @@ public class Texture2D : ITextureReturnable, IDisposable
         _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, _surfacePtr);
 
         SDL.SDL_QueryTexture(_texturePtr, out uint _, out int _, out int w, out int h);
-        Width = w;
-        Height = h;
+        (Width, Height) = (w, h);
     }
 
     /// <summary>
@@ -117,7 +116,7 @@ public class Texture2D : ITextureReturnable, IDisposable
     public Texture2D(IntPtr renderer, IntPtr imagePtr, bool isTexture)
         : this()
     {
-        if (renderer != IntPtr.Zero || imagePtr != IntPtr.Zero)
+        if (renderer == IntPtr.Zero || imagePtr == IntPtr.Zero)
             throw new ArgumentException("An invalid argument was passed.");
 
         if (isTexture)
@@ -133,8 +132,7 @@ public class Texture2D : ITextureReturnable, IDisposable
         _rendererPtr = renderer;
 
         SDL.SDL_QueryTexture(_texturePtr, out uint _, out int _, out int w, out int h);
-        Width = w;
-        Height = h;
+        (Width, Height) = (w, h);
     }
 
     ~Texture2D() => Dispose();
