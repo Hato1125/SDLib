@@ -284,7 +284,7 @@ public class Application
     {
         Tracer.PrintInfo("Initialize sdllibs.");
 
-        if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
+        if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING) < 0)
             throw new Exception(SDL.SDL_GetError());
 
         if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) < 0)

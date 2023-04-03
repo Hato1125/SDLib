@@ -5,7 +5,7 @@ using SDL2;
 
 namespace SDLib.Graphics;
 
-public class Texture2D : IDisposable
+public class Texture2D : ITextureReturnable, IDisposable
 {
     private readonly SDL.SDL_Surface _surface;
     private readonly IntPtr _surfacePtr;
@@ -163,7 +163,7 @@ public class Texture2D : IDisposable
         SDL.SDL_RenderCopyExF(
             _rendererPtr,
             _texturePtr,
-            ref imageRect,
+            IntPtr.Zero,
             _drawRectPtr,
             Rotation,
             ref refePoint,
@@ -174,14 +174,15 @@ public class Texture2D : IDisposable
     /// <summary>
     /// Surfaceを取得する
     /// </summary>
-    public SDL.SDL_Surface GetSurface()
-        => _surface;
+    public IntPtr GetSurface()
+        => _surfacePtr;
 
     /// <summary>
-    /// Textureのポインタを取得する
+    /// Textureを取得する
     /// </summary>
-    public IntPtr GetTexture()
-        => _texturePtr;
+    /// <returns>Texture2D</returns>
+    public Texture2D GetTexture()
+        => this;
 
     /// <summary>
     /// Texture2Dを破棄する
@@ -201,8 +202,6 @@ public class Texture2D : IDisposable
             || _diffDrawRect.w != _drawRect.w
             || _diffDrawRect.h != _drawRect.h)
         {
-            Tracer.PrintInfo("Convert drawing information structure to pointer");
-
             Marshal.StructureToPtr(_drawRect, _drawRectPtr, false);
             _diffDrawRect = _drawRect;
         }
