@@ -27,15 +27,18 @@ public class TextureArea : ITextureReturnable, IDisposable
     /// レンダリングする
     /// </summary>
     /// <param name="render">レンダリング</param>
+    /// <param name="returnRenderer">レンダラーを戻すときのテクスチャ</param>
     /// <returns>Texture2D</returns>
-    public Texture2D Render(Action render)
+    public Texture2D Render(Action render, IntPtr? returnRenderer = null)
     {
+        var returnRenderTarget = returnRenderer != null ? returnRenderer.Value : IntPtr.Zero;
+
         SDL.SDL_SetRenderDrawBlendMode(_rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
         SDL.SDL_SetRenderDrawColor(_rendererPtr, 0, 0, 0, 0);
         SDL.SDL_SetRenderTarget(_rendererPtr, _texture.GetTexturePtr());
         SDL.SDL_RenderClear(_rendererPtr);
         render.Invoke();
-        SDL.SDL_SetRenderTarget(_rendererPtr, IntPtr.Zero);
+        SDL.SDL_SetRenderTarget(_rendererPtr, returnRenderTarget);
 
         return _texture;
     }

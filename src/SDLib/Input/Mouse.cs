@@ -7,12 +7,12 @@ public static class Mouse
     private static readonly sbyte[] _value = new sbyte[5];
 
     /// <summary>
-    /// マウスの座標
+    /// マウスのX方向の絶対座標
     /// </summary>
     public static int X { get; private set; }
 
     /// <summary>
-    /// マウスのY座標
+    /// マウスのY方向の絶対座標
     /// </summary>
     public static int Y { get; private set; }
 
@@ -21,7 +21,7 @@ public static class Mouse
     /// </summary>
     public static void Update()
     {
-        uint state = SDL.SDL_GetMouseState(out int x, out int y);
+        uint state = SDL.SDL_GetGlobalMouseState(out int x, out int y);
         X = x;
         Y = y;
 
