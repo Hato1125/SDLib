@@ -1,6 +1,8 @@
 using System.Runtime.InteropServices;
 using SDL2;
 
+namespace SDLib.Input;
+
 public static class Keyboard
 {
     private static IntPtr _keyState = IntPtr.Zero;

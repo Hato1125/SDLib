@@ -125,6 +125,9 @@ public class App
             throw new Exception(SDL.SDL_GetError());
         }
 
+        _info.WindowPtr = _window.WindowPtr;
+        _info.RenderPtr = _window.RenderPtr;
+
         InitSDL();
         OnInitialize?.Invoke(Info);
     }
