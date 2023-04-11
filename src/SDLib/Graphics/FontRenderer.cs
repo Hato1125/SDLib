@@ -95,6 +95,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
 
         byte[] unicodeByte = Encoding.Unicode.GetBytes(Text);
         string unicodeText = Encoding.Unicode.GetString(unicodeByte);
+
         var textColor = new SDL.SDL_Color()
         {
             r = FontFamily.FontColor.R,
@@ -112,10 +113,10 @@ public class FontRenderer : ITextureReturnable, IDisposable
         if (surface == IntPtr.Zero)
             throw new Exception(SDL_ttf.TTF_GetError());
 
+        // すでにsurfaceは解放されているからdisposeだけで解放する
         _texture.Dispose();
         _texture = new(_rendererPtr, surface, false);
 
         SDL_ttf.TTF_CloseFont(font);
-        SDL.SDL_FreeSurface(surface);
     }
 }

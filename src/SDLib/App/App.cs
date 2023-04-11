@@ -145,6 +145,12 @@ public class App
             _window.Dispose();
             throw new Exception(SDL_image.IMG_GetError());
         }
+
+        if(SDL_ttf.TTF_Init() < 0)
+        {
+            _window.Dispose();
+            throw new Exception(SDL_ttf.TTF_GetError());
+        }
     }
 
     private void Loop()
@@ -212,6 +218,7 @@ public class App
     private void QuitSDL()
     {
         SDL_image.IMG_Quit();
+        SDL_ttf.TTF_Quit();
         SDL.SDL_Quit();
     }
 }

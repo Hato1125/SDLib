@@ -1,5 +1,6 @@
 using System.Drawing;
 using SDLib;
+using SDLib.Input;
 using SDLib.Graphics;
 using SDLib.Resource;
 using SDL2;
@@ -10,6 +11,7 @@ internal class Game : App
 {
     private readonly TextureManager _textureManager = new();
     private Texture2D? _texture;
+    private FontRenderer? font;
 
     public Game(
         string windowTitle,
@@ -36,7 +38,9 @@ internal class Game : App
 
     void Init(IReadOnlyAppInfo info)
     {
-        _texture = _textureManager.LoadTexture(info.RenderPtr, $"{AppContext.BaseDirectory}test.png");
+        var family = new FontFamily($"{AppContext.BaseDirectory}07やさしさゴシックボールド.ttf", 30, Color.White);
+        font = new(info.RenderPtr, family);
+        font.Text = "Font";
     }
 
     void Event(IReadOnlyAppInfo info, SDL.SDL_Event e)
@@ -45,7 +49,15 @@ internal class Game : App
 
     void Loop(IReadOnlyAppInfo info)
     {
-        _texture?.Render(0, 0);
+        Keyboard.Update();
+
+        if(Keyboard.IsPushed(SDL.SDL_Scancode.SDL_SCANCODE_A))
+        {
+            if(font != null)
+                font.Text += "a";
+        }
+
+        font?.Render().Render(0,0);
     }
 
     void Finish(IReadOnlyAppInfo info)
