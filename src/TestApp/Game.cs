@@ -1,18 +1,12 @@
 using System.Drawing;
-using SDLib;
-using SDLib.Input;
-using SDLib.Graphics;
-using SDLib.Resource;
 using SDL2;
+using SDLib;
+using SDLib.Framework;
 
 namespace TestProj;
 
 internal class Game : App
 {
-    private readonly TextureManager _textureManager = new();
-    private Texture2D? _texture;
-    private FontRenderer? font;
-
     public Game(
         string windowTitle,
         SDL.SDL_WindowFlags windowFlag,
@@ -38,9 +32,7 @@ internal class Game : App
 
     void Init(IReadOnlyAppInfo info)
     {
-        var family = new FontFamily($"{AppContext.BaseDirectory}07やさしさゴシックボールド.ttf", 30, Color.White);
-        font = new(info.RenderPtr, family);
-        font.Text = "Font";
+        SceneManager.RegistScene("Test", new TestScene());
     }
 
     void Event(IReadOnlyAppInfo info, SDL.SDL_Event e)
@@ -49,19 +41,11 @@ internal class Game : App
 
     void Loop(IReadOnlyAppInfo info)
     {
-        Keyboard.Update();
-
-        if(Keyboard.IsPushed(SDL.SDL_Scancode.SDL_SCANCODE_A))
-        {
-            if(font != null)
-                font.Text += "a";
-        }
-
-        font?.Render().Render(0,0);
+        SceneManager.ViewScene(info);
     }
 
     void Finish(IReadOnlyAppInfo info)
     {
-        _textureManager.DeleteAllTexture();
+        SceneManager.RemoveAllScene();
     }
 }

@@ -5,17 +5,17 @@ public static class Tracer
     /// <summary>
     /// 情報出力の際のヘッダー
     /// </summary>
-    public static string InfoHeader { get; set; } = "[Info] ";
+    public static string InfoHeader { get; set; } = "[ Info ] ";
 
     /// <summary>
     /// 注意出力の際のヘッダー
     /// </summary>
-    public static string WarningHeader { get; set; } = "[Warning] ";
+    public static string WarningHeader { get; set; } = "[ Warning ] ";
 
     /// <summary>
     /// エラー出力の際のヘッダー
     /// </summary>
-    public static string ErrorHeader { get; set; } = "[Error] ";
+    public static string ErrorHeader { get; set; } = "[ Error ] ";
 
     /// <summary>
     /// 情報出力の際の文字色
