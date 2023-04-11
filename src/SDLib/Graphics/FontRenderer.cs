@@ -57,7 +57,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
     {
         // フォントファミリーのパラメーターが変更されたら再度作り直す
         if (_isFastCreate
-            ||Text != _bufferText
+            || Text != _bufferText
             || FontFamily.FontName != _bufferFamily.FontName
             || FontFamily.FontSize != _bufferFamily.FontSize
             || FontFamily.FontColor != _bufferFamily.FontColor)
@@ -114,7 +114,8 @@ public class FontRenderer : ITextureReturnable, IDisposable
             throw new Exception(SDL_ttf.TTF_GetError());
 
         // すでにsurfaceは解放されているからdisposeだけで解放する
-        _texture.Dispose();
+        if (!_isFastCreate)
+            _texture.Dispose();
         _texture = new(_rendererPtr, surface, false);
 
         SDL_ttf.TTF_CloseFont(font);
