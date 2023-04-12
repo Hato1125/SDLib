@@ -36,19 +36,32 @@ public class Actor : IDisposable
     /// 更新する
     /// </summary>
     public void Update()
-        => ActorUpdate();
+    {
+        foreach(var component in ComponentList)
+            component.Update();
+
+        ActorUpdate();
+    }
 
     /// <summary>
     /// レンダリングする
     /// </summary>
     public void Render()
-        => ActorRender();
+    {
+        foreach(var component in ComponentList)
+            component.Render();
+
+        ActorRender();
+    }
 
     /// <summary>
     /// 破棄する
     /// </summary>
     public void Dispose()
     {
+        foreach(var component in ComponentList)
+            component.Dispose();
+
         ActorDispose(true);
         GC.SuppressFinalize(this);
     }
