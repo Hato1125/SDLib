@@ -17,7 +17,7 @@ public class Scene
     /// <summary>
     /// Sceneが初期化をしたか
     /// </summary>
-    public bool IsInit { get; set; }
+    public bool IsInit { get; set; } = true;
 
     /// <summary>
     /// Sceneが更新中、またはレンダリング中か

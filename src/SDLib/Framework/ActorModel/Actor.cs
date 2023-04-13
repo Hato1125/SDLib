@@ -20,7 +20,7 @@ public class Actor : IDisposable
     /// <summary>
     /// コンポーネントのリスト
     /// </summary>
-    private readonly List<Component> ComponentList = new();
+    public readonly List<Component> ComponentList = new();
 
     /// <summary>
     /// Actorを初期化する
