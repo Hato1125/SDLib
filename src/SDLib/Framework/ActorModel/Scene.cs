@@ -63,6 +63,8 @@ public class Scene
     /// </summary>
     public virtual void Finish()
     {
+        IsUpdating = false;
+
         foreach (var actor in Actors)
             actor.Dispose();
 

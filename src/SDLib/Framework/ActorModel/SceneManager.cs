@@ -13,6 +13,16 @@ public static class SceneManager
     private static Scene? _sceneInstance = null;
 
     /// <summary>
+    /// 次のフレームにシーンセットを実行するか
+    /// </summary>
+    private static bool _isNextFrameSet = false;
+
+    /// <summary>
+    /// 次のフレームにシーンセットするシーン名
+    /// </summary>
+    private static string _nextFrameSetSceneName = string.Empty;
+
+    /// <summary>
     /// 現在のSceneの名前を取得する
     /// </summary>
     public static string SceneName { get; private set; } = string.Empty;
@@ -32,7 +42,7 @@ public static class SceneManager
     {
         _sceneList.Add(sceneName, scene);
 
-        if(isFastSetScene && SceneName == string.Empty)
+        if (isFastSetScene && SceneName == string.Empty)
             SetScene(sceneName);
     }
 
@@ -41,6 +51,26 @@ public static class SceneManager
     /// </summary>
     /// <param name="sceneName">シーン名</param>
     public static void SetScene(string sceneName)
+    {
+        // 現在のシーンが更新中なら次のフレームにシーンセットを遅らせる
+        if (_sceneInstance != null && _sceneInstance.IsUpdating)
+        {
+            Tracer.PrintInfo("NextFrame SetScene.");
+
+            _isNextFrameSet = true;
+            _nextFrameSetSceneName = sceneName;
+        }
+        else
+        {
+            Tracer.PrintInfo("NowFrame SetScene.");
+            SetSceneInfo(sceneName);
+        }
+    }
+
+    /// <summary>
+    /// Scene情報をセットする
+    /// </summary>
+    private static void SetSceneInfo(string sceneName)
     {
         if (_sceneInstance != null)
         {
@@ -84,16 +114,28 @@ public static class SceneManager
     /// <param name="info">アプリケーションの情報</param>
     public static void ViewScene(IReadOnlyAppInfo info)
     {
-        if(_sceneInstance == null)
+        if (_sceneInstance == null)
             return;
 
-        if(_sceneInstance.IsInit)
+        if (_sceneInstance.IsInit)
         {
             _sceneInstance.Init(info);
             _sceneInstance.IsInit = false;
         }
         else
         {
+            // シーンをセットする
+            if (_isNextFrameSet)
+            {
+                SetSceneInfo(_nextFrameSetSceneName);
+
+                _isNextFrameSet = false;
+                _nextFrameSetSceneName = string.Empty;
+
+                // シーンをセットしたらInitなしにUpdate、Renderが実行されるのでreturnさせる
+                return;
+            }
+
             _sceneInstance.Update(info);
             _sceneInstance.Render(info);
             SceneActorNumber = _sceneInstance.Actors.Count;
