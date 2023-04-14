@@ -52,7 +52,10 @@ public static class SceneManager
     /// <param name="sceneName">シーン名</param>
     public static void SetScene(string sceneName)
     {
-        // 現在のシーンが更新中なら次のフレームにシーンセットを遅らせる
+        // 現在のシーンが更新中なのにシーンをセットすると、
+        // UpdateでActorListを回しているから例外が発生する
+        // なのでシーンがアップデート中の場合は次のフレームで
+        // シーンが更新する前にシーンをセットする
         if (_sceneInstance != null && _sceneInstance.IsUpdating)
         {
             Tracer.PrintInfo("NextFrame SetScene.");
