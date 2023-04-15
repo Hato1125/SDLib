@@ -10,6 +10,12 @@ public class Scene
     public readonly List<Actor> DelayActors = new();
 
     /// <summary>
+    /// 死んだActorのリスト
+    /// </summary>
+    /// <returns></returns>
+    public readonly List<Actor> DeadActors = new();
+
+    /// <summary>
     /// Actorのリスト
     /// </summary>
     public readonly List<Actor> Actors = new();
@@ -55,7 +61,8 @@ public class Scene
 
         // Actorの後処理
         AddDelayActors();
-        RemoveDeadActor();
+        AddDeadActor();
+        RemoveDeadActorList();
     }
 
     /// <summary>
@@ -105,7 +112,7 @@ public class Scene
         if (DelayActors.Count <= 0)
             return;
 
-        Tracer.PrintInfo("** Add Delay Actors **");
+        Tracer.PrintInfo("Add Delay Actors.");
         foreach (var actor in DelayActors)
         {
             if (actor.State != Actor.ActorState.Dead)
@@ -116,14 +123,30 @@ public class Scene
     }
 
     /// <summary>
-    /// 状態がDeadのActorを消去する
+    /// 状態がDeadのActorを死んだActorリストに入れる
     /// </summary>
-    private void RemoveDeadActor()
+    private void AddDeadActor()
     {
         foreach (var actor in Actors)
         {
             if (actor.State == Actor.ActorState.Dead)
-                RemoveActor(actor);
+            {
+                // そのままActor.Removeを行うことができないので
+                // いちいちDeadActorsに入れてRemoveする
+                Tracer.PrintInfo("Add Dead Actor.");
+                DeadActors.Add(actor);
+            }
         }
+    }
+
+    /// <summary>
+    /// 死んだActorたちを消去する
+    /// </summary>
+    private void RemoveDeadActorList()
+    {
+        foreach (var actor in DeadActors)
+            RemoveActor(actor);
+
+        DeadActors.Clear();
     }
 }
