@@ -1,4 +1,7 @@
+using System.Drawing;
+using SDLib.Graphics;
 using SDLib.Framework;
+using SDLib.Input;
 
 namespace SDLib;
 

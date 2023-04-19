@@ -1,6 +1,7 @@
 using System.Drawing;
 using SDL2;
 using SDLib;
+using SDLib.Input;
 using SDLib.Framework;
 
 namespace TestProj;
@@ -41,6 +42,7 @@ internal class Game : App
 
     void Loop(IReadOnlyAppInfo info)
     {
+        Keyboard.Update();
         SceneManager.ViewScene(info);
     }
 
