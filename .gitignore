@@ -1,7 +1,7 @@
 .vs/
 .vscode/
 src/SDLib/obj/
-src/TestApp/obj/
+src/SDLib.Test/obj/
 
 *.exe
 *.dll
