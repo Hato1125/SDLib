@@ -4,7 +4,7 @@ using SDLib;
 using SDLib.Input;
 using SDLib.Framework;
 
-namespace TestProj;
+namespace SDLib.Test;
 
 internal class Game : App
 {

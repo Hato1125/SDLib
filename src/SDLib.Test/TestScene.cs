@@ -3,7 +3,7 @@ using SDLib.Graphics;
 using SDLib.Framework;
 using SDLib.Input;
 
-namespace SDLib;
+namespace SDLib.Test;
 
 internal class TestScene : Scene
 {

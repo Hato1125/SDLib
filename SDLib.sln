@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SDLib", "src\SDLib\SDLib.csproj", "{6AC112DE-C0B3-4A7B-9B9B-9A87BCEEB6B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "src\TestApp\TestApp.csproj", "{AD58F1F1-0976-429F-8C97-B0DE2AE29A53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SDLib.Test", "src\SDLib.Test\SDLib.Test.csproj", "{AD58F1F1-0976-429F-8C97-B0DE2AE29A53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

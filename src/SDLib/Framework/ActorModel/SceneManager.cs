@@ -63,7 +63,6 @@ public static class SceneManager
         }
         else
         {
-            Tracer.PrintInfo("NowFrame SetScene.");
             SetSceneInfo(sceneName);
         }
     }

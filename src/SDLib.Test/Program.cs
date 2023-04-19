@@ -1,10 +1,6 @@
-﻿using System.Drawing;
-using SDLib.Graphics;
-using SDLib;
-using System.Runtime.InteropServices;
-using SDL2;
+﻿using SDL2;
 
-namespace TestProj;
+namespace SDLib.Test;
 
 internal class Program
 {
