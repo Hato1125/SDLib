@@ -84,7 +84,6 @@ public class Scene
     /// <param name="actor">Actor</param>
     public void AddActor(Actor actor)
     {
-        Tracer.PrintInfo("Add Actor.");
         if (IsUpdating)
             DelayActors.Add(actor);
         else
@@ -100,7 +99,6 @@ public class Scene
         if (!Actors.Contains(actor))
             return;
 
-        Tracer.PrintInfo("Remove Actor.");
         Actors.Remove(actor);
     }
 
@@ -112,7 +110,6 @@ public class Scene
         if (DelayActors.Count <= 0)
             return;
 
-        Tracer.PrintInfo("Add Delay Actors.");
         foreach (var actor in DelayActors)
         {
             if (actor.State != Actor.ActorState.Dead)
@@ -133,7 +130,6 @@ public class Scene
             {
                 // そのままActor.Removeを行うことができないので
                 // いちいちDeadActorsに入れてRemoveする
-                Tracer.PrintInfo("Add Dead Actor.");
                 DeadActors.Add(actor);
             }
         }

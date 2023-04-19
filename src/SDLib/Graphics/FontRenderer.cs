@@ -1,4 +1,3 @@
-using System.Text;
 using SDL2;
 
 namespace SDLib.Graphics;
@@ -99,15 +98,9 @@ public class FontRenderer : ITextureReturnable, IDisposable
             return;
 
         if (Text.Contains('\n'))
-        {
-            Tracer.PrintInfo("Create MultiLineText.");
             CreateMultiLineText(Text);
-        }
         else
-        {
-            Tracer.PrintInfo("Create SingleLineText.");
             CreateSingleLineText(Text);
-        }
     }
 
     private void CreateMultiLineText(string text)
