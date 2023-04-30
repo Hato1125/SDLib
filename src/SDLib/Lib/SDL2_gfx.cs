@@ -27,6 +27,7 @@
 #endregion
 
 #region Using Statements
+using System;
 using System.Runtime.InteropServices;
 #endregion
 
@@ -85,7 +86,7 @@ namespace SDL2
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern int boxRGBA(IntPtr renderer, short x1, short y1, short x2, short y2, byte r, byte g, byte b, byte a);
 		
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "roundedBoxColor")]
+		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern int roundedBoxColor(IntPtr renderer, short x1, short y1, short x2, short y2, short rad, uint color);
 		
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]

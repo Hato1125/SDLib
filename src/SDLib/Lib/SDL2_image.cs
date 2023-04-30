@@ -38,7 +38,7 @@ namespace SDL2
 		#region SDL2# Variables
 
 		/* Used by DllImport to load the native library. */
-		private const string nativeLibName = "SDL2_image.dll";
+		private const string nativeLibName = "SDL2_image";
 
 		#endregion
 
@@ -74,8 +74,9 @@ namespace SDL2
 		{
 			SDL.SDL_version result;
 			IntPtr result_ptr = INTERNAL_IMG_Linked_Version();
-			result = SDL.PtrToStructure<SDL.SDL_version>(
-				result_ptr
+			result = (SDL.SDL_version) Marshal.PtrToStructure(
+				result_ptr,
+				typeof(SDL.SDL_version)
 			);
 			return result;
 		}
