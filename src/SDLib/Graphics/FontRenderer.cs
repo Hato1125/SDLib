@@ -4,8 +4,8 @@ namespace SDLib.Graphics;
 
 public class FontRenderer : ITextureReturnable, IDisposable
 {
-    private IntPtr _rendererPtr;
-    private Texture2D _texture;
+    private readonly IntPtr _rendererPtr;
+    private readonly Texture2D _texture;
     private FontFamily _bufferFamily;
     private string _bufferText;
     private bool _isFastCreate;
@@ -25,12 +25,16 @@ public class FontRenderer : ITextureReturnable, IDisposable
     /// <summary>
     /// FontRendererを初期化する
     /// </summary>
-    public FontRenderer()
+    public FontRenderer(IntPtr renderer)
     {
+        if (renderer == IntPtr.Zero)
+            throw new ArgumentException("An invalid pointer was passed.", nameof(renderer));
+
+        _rendererPtr = renderer;
         _isFastCreate = true;
         _rendererPtr = IntPtr.Zero;
         _bufferText = string.Empty;
-        _texture = new();
+        _texture = new(renderer);
         _bufferFamily = new();
         FontFamily = new();
         Text = string.Empty;
@@ -42,11 +46,8 @@ public class FontRenderer : ITextureReturnable, IDisposable
     /// <param name="renderer">レンダラー</param>
     /// <param name="fontFamily">フォントファミリー</param>
     public FontRenderer(IntPtr renderer, FontFamily fontFamily)
-        : this()
+        : this(renderer)
     {
-        if (renderer == IntPtr.Zero)
-            throw new Exception("An invalid pointer was passed.");
-
         _rendererPtr = renderer;
         FontFamily = fontFamily;
     }
@@ -106,7 +107,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
     private void CreateMultiLineText(string text)
     {
         // 文字を改行コードごとに分割する
-        string[] splitText = text.Split('\n');
+        var splitText = text.Split('\n');
 
         // 複数行分の文字Textureを作成する
         var textureSize = new (int width, int height)[splitText.Length];
@@ -133,15 +134,14 @@ public class FontRenderer : ITextureReturnable, IDisposable
         }
 
         // サイズを計算
-        (int width, int height) textSize = (0, 0);
+        var textSize = (width: 0, height: 0);
         for (int i = 0; i < splitText.Length; i++)
             textSize.height += textureSize[i].height;
 
         textSize.width = textureSize.Max(textureSize => textureSize.width);
 
         // 文字たちを合成
-        if (_textureArea != null)
-            _textureArea.Dispose();
+        _textureArea?.Dispose();
 
         _textureArea = new(_rendererPtr, textSize.width, textSize.height);
         _textureArea.Render(() =>
@@ -179,8 +179,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
         var texture = new Texture2D(_rendererPtr, surface, false);
 
         // 文字たちを合成
-        if (_textureArea != null)
-            _textureArea.Dispose();
+        _textureArea?.Dispose();
 
         _textureArea = new(_rendererPtr, texture.Width, texture.Height);
         _textureArea.Render(() => texture.Render(0, 0));

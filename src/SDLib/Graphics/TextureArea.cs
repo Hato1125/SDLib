@@ -4,8 +4,8 @@ namespace SDLib.Graphics;
 
 public class TextureArea : ITextureReturnable, IDisposable
 {
-    private IntPtr _rendererPtr;
-    private Texture2D _texture;
+    private readonly IntPtr _rendererPtr;
+    private readonly Texture2D _texture;
 
     /// <summary>
     /// TextureAreaを初期化する

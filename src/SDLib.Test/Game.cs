@@ -1,6 +1,7 @@
 using System.Drawing;
 using SDL2;
 using SDLib;
+using SDLib.Framework;
 using SDLib.Input;
 using SDLib.NewFramework;
 
@@ -8,9 +9,7 @@ namespace SDLib.Test;
 
 internal class Game : App
 {
-    private Actor TestActor1;
-    private Actor TestActor2;
-    public readonly Scene scene = new();
+    public readonly TestScene test = new TestScene();
 
     public Game(
         string windowTitle,
@@ -37,11 +36,7 @@ internal class Game : App
 
     void Init(IReadOnlyAppInfo info)
     {
-        TestActor1 = new Actor(scene, 1);
-        TestActor2 = new Actor(scene, 2);
-
-        foreach(var com in scene.ActorList)
-            Console.WriteLine(com.Order);
+        SceneManager.RegistScene("Test", test);
     }
 
     void Event(IReadOnlyAppInfo info, SDL.SDL_Event e)
@@ -51,14 +46,7 @@ internal class Game : App
     void Loop(IReadOnlyAppInfo info)
     {
         Keyboard.Update();
-
-        scene.IsUpdating = true;
-
-        scene.Update(info);
-        scene.Render(info);
-
-        scene.IsUpdating = false;
-        scene.ActorCleaning();
+        SceneManager.ViewScene(info);
     }
 
     void Finish(IReadOnlyAppInfo info)

@@ -5,20 +5,20 @@ namespace SDLib.Graphics;
 
 public class Texture2D : ITextureReturnable, IDisposable
 {
-    private readonly IntPtr _rendererPtr;
-    private IntPtr _surfacePtr;
-    private IntPtr _texturePtr;
+    private readonly IntPtr _rendererPtr = IntPtr.Zero;
+    private IntPtr _surfacePtr = IntPtr.Zero;
+    private IntPtr _texturePtr = IntPtr.Zero;
     private SDL.SDL_FRect _renderRect;
 
     /// <summary>
     /// 画像の横幅
     /// </summary>
-    public int Width { get; private set; }
+    public readonly int Width;
 
     /// <summary>
     /// 画像の高さ
     /// </summary>
-    public int Height { get; private set; }
+    public readonly int Height;
 
     /// <summary>
     /// 横幅のスケール
@@ -58,7 +58,12 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// <summary>
     /// 回転時の描画基準点
     /// </summary>
-    public RotationPoint RotationPoint { get; set; }
+    public ReferencePoint RotationPoint { get; set; }
+
+    /// <summary>
+    /// レンダリングの基準点
+    /// </summary>
+    public ReferencePoint RenderPoint { get; set; }
 
     /// <summary>
     /// 描画時のブレンドモード
@@ -73,16 +78,19 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// <summary>
     /// Texture2Dを初期化する
     /// </summary>
-    public Texture2D()
+    public Texture2D(IntPtr renderer)
     {
-        _surfacePtr = IntPtr.Zero;
-        _texturePtr = IntPtr.Zero;
+        if (renderer == IntPtr.Zero)
+            throw new ArgumentException("An invalid pointer was passed.", nameof(renderer));
+
+        _rendererPtr = renderer;
         WidthScale = 1f;
         HeightScale = 1f;
         AlphaMod = byte.MaxValue;
         Rotation = 0;
         Brightness = Color.White;
-        RotationPoint = RotationPoint.TopLeft;
+        RotationPoint = ReferencePoint.TopLeft;
+        RenderPoint = ReferencePoint.TopLeft;
         BlendMode = SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND;
         RenderFlip = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
     }
@@ -92,18 +100,19 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// </summary>
     /// <param name="renderer">レンダラー</param>
     /// <param name="fileName">ファイル名</param>
-    public Texture2D(IntPtr renderer, string fileName)
-        : this()
+    public Texture2D(IntPtr renderer, string fileName, bool isSurfaceDispose = false)
+        : this(renderer)
     {
-        if (renderer == IntPtr.Zero)
-            throw new Exception("An invalid handle was passed.");
-
         _surfacePtr = SDL_image.IMG_Load(fileName);
         if (_surfacePtr == IntPtr.Zero)
             throw new Exception(SDL_image.IMG_GetError());
 
-        _rendererPtr = renderer;
         _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, _surfacePtr);
+        if (_texturePtr == IntPtr.Zero)
+            throw new Exception(SDL.SDL_GetError());
+
+        if (isSurfaceDispose)
+            SDL.SDL_FreeSurface(_surfacePtr);
 
         SDL.SDL_QueryTexture(_texturePtr, out uint _, out int _, out int w, out int h);
         (Width, Height) = (w, h);
@@ -115,20 +124,26 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// <param name="renderer">レンダラー</param>
     /// <param name="surfacePtr">サーフェスのポインタ</param>
     /// <param name="rect">画像のサイズ</param>
-    public Texture2D(IntPtr renderer, IntPtr imagePtr, bool isTexture)
-        : this()
+    public Texture2D(IntPtr renderer, IntPtr image, bool isTexture, bool isSurfaceDispose = false)
+        : this(renderer)
     {
-        if (renderer == IntPtr.Zero || imagePtr == IntPtr.Zero)
-            throw new ArgumentException("An invalid argument was passed.");
+        if (image == IntPtr.Zero)
+            throw new ArgumentException("An invalid pointer was passed.", nameof(image));
 
         if (isTexture)
         {
-            _texturePtr = imagePtr;
+            _texturePtr = image;
         }
         else
         {
-            _surfacePtr = imagePtr;
-            _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, imagePtr);
+            _surfacePtr = image;
+
+            _texturePtr = SDL.SDL_CreateTextureFromSurface(renderer, image);
+            if (_texturePtr == IntPtr.Zero)
+                throw new Exception(SDL.SDL_GetError());
+
+            if (isSurfaceDispose)
+                SDL.SDL_FreeSurface(_surfacePtr);
         }
 
         _rendererPtr = renderer;
@@ -146,16 +161,17 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// <param name="y">Y座標</param>
     public void Render(float x, float y)
     {
-        var refePoint = CalculateRotationPoint();
-        _renderRect.x = x - refePoint.x;
-        _renderRect.y = y - refePoint.y;
+        var rotationPoint = CalcRotationPoint();
+        var renderPoint = CalcRenderPoint();
+        _renderRect.x = x - renderPoint.X;
+        _renderRect.y = y - renderPoint.Y;
         _renderRect.w = Width * WidthScale;
         _renderRect.h = Height * HeightScale;
 
         SDL.SDL_SetTextureBlendMode(_texturePtr, BlendMode);
         SDL.SDL_SetTextureAlphaMod(_texturePtr, AlphaMod);
         SDL.SDL_SetTextureColorMod(_texturePtr, Brightness.R, Brightness.G, Brightness.B);
-        SDL.SDL_RenderCopyExF(_rendererPtr, _texturePtr, IntPtr.Zero, ref _renderRect, Rotation, ref refePoint, RenderFlip);
+        SDL.SDL_RenderCopyExF(_rendererPtr, _texturePtr, IntPtr.Zero, ref _renderRect, Rotation, ref rotationPoint, RenderFlip);
     }
 
     /// <summary>
@@ -199,22 +215,35 @@ public class Texture2D : ITextureReturnable, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private SDL.SDL_FPoint CalculateRotationPoint() => RotationPoint switch
+    private SDL.SDL_FPoint CalcRotationPoint() => RotationPoint switch
     {
-        RotationPoint.TopLeft => new() { x = 0, y = 0 },
-        RotationPoint.TopCenter => new() { x = Width / 2, y = 0 },
-        RotationPoint.TopRight => new() { x = Width, y = 0 },
-        RotationPoint.CenterLeft => new() { x = 0, y = Height / 2 },
-        RotationPoint.Center => new() { x = Width / 2, y = Height / 2 },
-        RotationPoint.CenterRight => new() { x = Width, y = Height / 2 },
-        RotationPoint.BottomLeft => new() { x = 0, y = Height },
-        RotationPoint.BottomCenter => new() { x = Width / 2, y = Height },
-        RotationPoint.BottomRight => new() { x = Width, y = Height },
+        ReferencePoint.TopLeft => new() { x = 0, y = 0 },
+        ReferencePoint.TopCenter => new() { x = Width / 2, y = 0 },
+        ReferencePoint.TopRight => new() { x = Width, y = 0 },
+        ReferencePoint.CenterLeft => new() { x = 0, y = Height / 2 },
+        ReferencePoint.Center => new() { x = Width / 2, y = Height / 2 },
+        ReferencePoint.CenterRight => new() { x = Width, y = Height / 2 },
+        ReferencePoint.BottomLeft => new() { x = 0, y = Height },
+        ReferencePoint.BottomCenter => new() { x = Width / 2, y = Height },
+        ReferencePoint.BottomRight => new() { x = Width, y = Height },
         _ => new() { x = 0, y = 0 }
+    };
+
+    private (float X, float Y) CalcRenderPoint() => RenderPoint switch {
+        ReferencePoint.TopLeft => (0, 0),
+        ReferencePoint.TopCenter => (ActualWidth / 2, 0),
+        ReferencePoint.TopRight => (ActualWidth, 0),
+        ReferencePoint.CenterLeft => (0, ActualHeight / 2),
+        ReferencePoint.Center => (ActualWidth / 2, ActualHeight / 2),
+        ReferencePoint.CenterRight => (ActualWidth, ActualHeight / 2),
+        ReferencePoint.BottomLeft => (0, ActualHeight),
+        ReferencePoint.BottomCenter => (ActualWidth / 2, ActualHeight),
+        ReferencePoint.BottomRight => (ActualWidth, ActualHeight),
+        _ => (0, 0)
     };
 }
 
-public enum RotationPoint
+public enum ReferencePoint
 {
     TopLeft,
     TopCenter,
