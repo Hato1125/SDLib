@@ -81,7 +81,7 @@ public class Texture2D : ITextureReturnable, IDisposable
     public Texture2D(IntPtr renderer)
     {
         if (renderer == IntPtr.Zero)
-            throw new ArgumentException("An invalid pointer was passed.", nameof(renderer));
+            throw new ArgumentNullException(nameof(renderer), "An invalid pointer was passed.");
 
         _rendererPtr = renderer;
         WidthScale = 1f;
@@ -128,7 +128,7 @@ public class Texture2D : ITextureReturnable, IDisposable
         : this(renderer)
     {
         if (image == IntPtr.Zero)
-            throw new ArgumentException("An invalid pointer was passed.", nameof(image));
+            throw new ArgumentNullException(nameof(image), "An invalid pointer was passed.");
 
         if (isTexture)
         {

@@ -28,7 +28,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
     public FontRenderer(IntPtr renderer)
     {
         if (renderer == IntPtr.Zero)
-            throw new ArgumentException("An invalid pointer was passed.", nameof(renderer));
+            throw new ArgumentNullException(nameof(renderer), "An invalid pointer was passed.");
 
         _rendererPtr = renderer;
         _isFastCreate = true;

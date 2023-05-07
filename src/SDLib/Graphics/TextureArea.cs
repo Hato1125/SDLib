@@ -15,12 +15,15 @@ public class TextureArea : ITextureReturnable, IDisposable
     /// <param name="height">高さ</param>
     public TextureArea(IntPtr renderer, int width, int height)
     {
+        if (renderer == IntPtr.Zero)
+            throw new ArgumentNullException(nameof(renderer), "An invalid pointer was passed.");
+
         _rendererPtr = renderer;
         var format = SDL.SDL_PIXELFORMAT_ARGB8888;
         var access = (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET;
         var texture = SDL.SDL_CreateTexture(renderer, format, access, width, height);
 
-        _texture = new(renderer, texture, true);
+        _texture = new(_rendererPtr, texture, true);
     }
 
     /// <summary>
