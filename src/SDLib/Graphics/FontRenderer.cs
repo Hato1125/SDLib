@@ -5,7 +5,7 @@ namespace SDLib.Graphics;
 public class FontRenderer : ITextureReturnable, IDisposable
 {
     private readonly IntPtr _rendererPtr;
-    private readonly Texture2D _texture;
+    private Texture2D _texture;
     private FontFamily _bufferFamily;
     private string _bufferText;
     private bool _isFastCreate;
@@ -123,6 +123,9 @@ public class FontRenderer : ITextureReturnable, IDisposable
         if (fontPtr == IntPtr.Zero)
             throw new Exception(SDL_ttf.TTF_GetError());
 
+        SDL_ttf.TTF_SetFontStyle(fontPtr, (int)FontFamily.FontStyle);
+
+        // サーフェスの作成
         for (int i = 0; i < splitText.Length; i++)
         {
             var surface = SDL_ttf.TTF_RenderUNICODE_Blended(fontPtr, splitText[i], fontColor);
@@ -149,6 +152,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
             for (int i = 0; i < splitText.Length; i++)
                 textTexture[i].Render(0, textTexture[i].Height * i);
         });
+        _texture = _textureArea.GetTexture();
 
         // 破棄処理
         foreach (var texture in textTexture)
@@ -171,6 +175,8 @@ public class FontRenderer : ITextureReturnable, IDisposable
         if (fontPtr == IntPtr.Zero)
             throw new Exception(SDL_ttf.TTF_GetError());
 
+        SDL_ttf.TTF_SetFontStyle(fontPtr, (int)FontFamily.FontStyle);
+
         // サーフェスの作成
         var surface = SDL_ttf.TTF_RenderUNICODE_Blended(fontPtr, text, textColor);
         if (surface == IntPtr.Zero)
@@ -183,6 +189,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
 
         _textureArea = new(_rendererPtr, texture.Width, texture.Height);
         _textureArea.Render(() => texture.Render(0, 0));
+        _texture = _textureArea.GetTexture();
 
         texture.Dispose();
         SDL_ttf.TTF_CloseFont(fontPtr);
