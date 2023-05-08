@@ -8,6 +8,7 @@ namespace SDLib.Test;
 internal class TestScene : Scene
 {
     private Texture2D? texture;
+    private FontRenderer? font;
     private double scale;
 
     public override void Init(IReadOnlyAppInfo info)
@@ -16,6 +17,10 @@ internal class TestScene : Scene
         {
             RenderPoint = ReferencePoint.Center,
         };
+
+        var family = new FontFamily($"C:\\Windows\\Fonts\\segoeui.ttf", 20, Color.Aqua);
+        font = new(info.RenderPtr, info.WindowPtr, family);
+        font.Text = "Test";
 
         base.Init(info);
     }
@@ -38,6 +43,8 @@ internal class TestScene : Scene
             texture.HeightScale = (float)(0.1 + sin);
             texture.Render(1280 / 2, 720 / 2);
         }
+
+        font?.Render()?.Render(100, 100);
 
         base.Render(info);
     }

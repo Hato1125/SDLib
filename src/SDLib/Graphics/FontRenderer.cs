@@ -5,10 +5,13 @@ namespace SDLib.Graphics;
 public class FontRenderer : ITextureReturnable, IDisposable
 {
     private readonly IntPtr _rendererPtr;
+    private readonly IntPtr _windowPtr;
     private Texture2D _texture;
     private FontFamily _bufferFamily;
     private string _bufferText;
     private bool _isFastCreate;
+    private int _windowWidth;
+    private int _windowHeight;
 
     private TextureArea? _textureArea;
 
@@ -25,12 +28,18 @@ public class FontRenderer : ITextureReturnable, IDisposable
     /// <summary>
     /// FontRendererを初期化する
     /// </summary>
-    public FontRenderer(IntPtr renderer)
+    /// <param name="renderer">Renderer</param>
+    /// <param name="window">Window</param>
+    public FontRenderer(IntPtr renderer, IntPtr window)
     {
         if (renderer == IntPtr.Zero)
             throw new ArgumentNullException(nameof(renderer), "An invalid pointer was passed.");
 
+        if (window == IntPtr.Zero)
+            throw new ArgumentNullException(nameof(window), "An invalid pointer was passed.");
+
         _rendererPtr = renderer;
+        _windowPtr = window;
         _isFastCreate = true;
         _rendererPtr = IntPtr.Zero;
         _bufferText = string.Empty;
@@ -43,10 +52,11 @@ public class FontRenderer : ITextureReturnable, IDisposable
     /// <summary>
     /// FontRendererを初期化する
     /// </summary>
-    /// <param name="renderer">レンダラー</param>
+    /// <param name="renderer">Renderer</param>
+    /// <param name="window">Window</param>
     /// <param name="fontFamily">フォントファミリー</param>
-    public FontRenderer(IntPtr renderer, FontFamily fontFamily)
-        : this(renderer)
+    public FontRenderer(IntPtr renderer, IntPtr window, FontFamily fontFamily)
+        : this(renderer, window)
     {
         _rendererPtr = renderer;
         FontFamily = fontFamily;
@@ -58,17 +68,23 @@ public class FontRenderer : ITextureReturnable, IDisposable
     public Texture2D? Render()
     {
         // フォントファミリーのパラメーターが変更されたら再度作り直す
+        // windowがリサイズされた場合も再度作りなおす
+        SDL.SDL_GetWindowSize(_windowPtr, out int width, out int height);
         if (_isFastCreate
             || Text != _bufferText
             || FontFamily.FontName != _bufferFamily.FontName
             || FontFamily.FontSize != _bufferFamily.FontSize
-            || FontFamily.FontColor != _bufferFamily.FontColor)
+            || FontFamily.FontColor != _bufferFamily.FontColor
+            || _windowWidth != width
+            || _windowHeight != height)
         {
             CreateFontTexture();
 
             _isFastCreate = false;
             _bufferText = Text;
             _bufferFamily = FontFamily;
+            _windowWidth = width;
+            _windowHeight = height;
         }
 
         return _textureArea?.GetTexture();
