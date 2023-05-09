@@ -112,7 +112,10 @@ public class Texture2D : ITextureReturnable, IDisposable
             throw new Exception(SDL.SDL_GetError());
 
         if (isSurfaceDispose)
+        {
             SDL.SDL_FreeSurface(_surfacePtr);
+            _surfacePtr = IntPtr.Zero;
+        }
 
         SDL.SDL_QueryTexture(_texturePtr, out uint _, out int _, out int w, out int h);
         (Width, Height) = (w, h);
@@ -143,7 +146,10 @@ public class Texture2D : ITextureReturnable, IDisposable
                 throw new Exception(SDL.SDL_GetError());
 
             if (isSurfaceDispose)
+            {
                 SDL.SDL_FreeSurface(_surfacePtr);
+                _surfacePtr = IntPtr.Zero;
+            }
         }
 
         _rendererPtr = renderer;
