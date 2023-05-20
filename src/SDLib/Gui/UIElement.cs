@@ -123,7 +123,7 @@ public class UIElement : IDisposable
     /// <summary>
     /// UIの更新時に呼ばれる
     /// </summary>
-    protected event Action? OnUIUpdating = delegate { };
+    protected event Action<double>? OnUIUpdating = delegate { };
 
     /// <summary>
     /// UIのレンダリング時に呼ばれる
@@ -193,7 +193,7 @@ public class UIElement : IDisposable
     /// <summary>
     /// UIの更新をする
     /// </summary>
-    public void Update()
+    public void Update(double deltaTime)
     {
         if(IsBuild)
         {
@@ -203,13 +203,13 @@ public class UIElement : IDisposable
 
         foreach(var child in ChildrenList)
         {
-            child.Update();
+            child.Update(deltaTime);
             child.Super = this;
             _isChildHovering = child.IsHovering();
         }
 
         CallInputEvent();
-        OnUIUpdating?.Invoke();
+        OnUIUpdating?.Invoke(deltaTime);
     }
 
     /// <summary>
@@ -340,6 +340,10 @@ public class UIElement : IDisposable
             return;
 
         TextureArea?.Dispose();
+
+        foreach (var child in ChildrenList)
+            child.Dispose();
+
         _isDisposing = true;
     }
 
@@ -349,7 +353,7 @@ public class UIElement : IDisposable
     /// <param name="e">イベント</param>
     protected virtual void UpdatingUIEvent(in SDL.SDL_Event e)
     {
-        switch(e.type)
+        switch (e.type)
         {
             case SDL.SDL_EventType.SDL_WINDOWEVENT:
                 _isWindowActive = e.window.windowEvent switch
