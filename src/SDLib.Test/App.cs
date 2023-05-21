@@ -68,62 +68,30 @@ internal class App
 
     private readonly UIDisplay display = new();
     private UITileAlignment? tile;
-    private UIButton? button;
-    private UIButton? button2;
-    private UIButton? button3;
-    private UIButton? button4;
-    private UIButton? button5;
-    private UIButton? button6;
-    private UIButton? button7;
+    private UIButton[]? button;
 
     private void Init()
     {
-        var family = new FontFamily("segoeui.ttf", 24, Color.DeepSkyBlue);
+        var family = new FontFamily("segoeui.ttf", 15, Color.White);
 
         tile = new(Renderer, Window, 1000, 1000, 2)
         {
-            ColumnPadding = 10,
-            RowPadding = 10,
+            ColumnPadding = 0,
+            RowPadding = 0,
             X = 0,
             Y = 0,
         };
 
-        button = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
-        {
-            Text = string.Empty,
-        };
-        button2 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
-        {
-            Text = string.Empty,
-        };
-        button3 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
-        {
-            Text = string.Empty,
-        };
-        button4 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
-        {
-            Text = string.Empty,
-        };
-        button5 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
-        {
-            Text = string.Empty,
-        };
-        button6 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
-        {
-            Text = string.Empty,
-        };
-        button7 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
-        {
-            Text = string.Empty,
-        };
+        button = new UIButton[270];
 
-        tile.ChildrenList.Add(button);
-        tile.ChildrenList.Add(button2);
-        tile.ChildrenList.Add(button3);
-        tile.ChildrenList.Add(button4);
-        tile.ChildrenList.Add(button5);
-        tile.ChildrenList.Add(button6);
-        tile.ChildrenList.Add(button7);
+        for (int i = 0; i < button.Length; i++)
+        {
+            button[i] = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+            {
+                Text = "Aka",
+            };
+            tile.ChildrenList.Add(button[i]);
+        }
 
         display.AddElement(tile);
     }

@@ -56,6 +56,9 @@ public class UILabel : UIElement
 
     void RenderLabel()
     {
+        if (string.IsNullOrEmpty(Text))
+            return;
+
         var fontPosition = (
             X: UIPosition.CalculatePosition(Width, FontRenderer.GetTexture().ActualWidth, TextHorizonta),
             Y: UIPosition.CalculatePosition(Height, FontRenderer.GetTexture().ActualHeight, TextHorizonta)

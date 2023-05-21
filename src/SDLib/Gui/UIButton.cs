@@ -170,12 +170,15 @@ public class UIButton : UIElement
         Rectangle.Height = Height;
         Rectangle.Render(0, 0);
 
-        var fontPosition = (
-            X: UIPosition.CalculatePosition(Width, FontRenderer.GetTexture().ActualWidth, TextHorizontal),
-            Y: UIPosition.CalculatePosition(Height, FontRenderer.GetTexture().ActualHeight, TextVertical)
-        );
+        if (!string.IsNullOrWhiteSpace(Text))
+        {
+            var fontPosition = (
+                X: UIPosition.CalculatePosition(Width, FontRenderer.GetTexture().ActualWidth, TextHorizontal),
+                Y: UIPosition.CalculatePosition(Height, FontRenderer.GetTexture().ActualHeight, TextVertical)
+            );
 
-        FontRenderer.Render()?.Render(fontPosition.X, fontPosition.Y);
+            FontRenderer.Render()?.Render(fontPosition.X, fontPosition.Y);
+        }
 
         if(Icon != null)
         {

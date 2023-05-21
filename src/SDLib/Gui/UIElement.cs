@@ -255,7 +255,7 @@ public class UIElement : IDisposable
             OnUIRendering?.Invoke();
             OnPaint?.Invoke();
 
-            foreach(var child in ChildrenList)
+            foreach (var child in ChildrenList)
             {
                 // 画面外にいるのにレンダリングするのは無駄なので
                 // 画面外にいるときはレンダリングしない
