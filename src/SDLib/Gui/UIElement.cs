@@ -9,7 +9,6 @@ public class UIElement : IDisposable
     #region Private Member
 
     private bool _isDisposing = false;
-    private bool _isChildHovering = false;
     private bool _isWindowActive = true;
 
     #endregion
@@ -36,6 +35,11 @@ public class UIElement : IDisposable
     #region Public Member
 
     /// <summary>
+    /// Display側で入力を受けるか
+    /// </summary>
+    public bool IsDisplayInput { get; set; } = true;
+
+    /// <summary>
     /// UIが入力を受け取るか
     /// </summary>
     public bool IsInput { get; set; } = true;
@@ -44,6 +48,11 @@ public class UIElement : IDisposable
     /// UIの生成を行うか
     /// </summary>
     public bool IsBuild { get; set; } = true;
+
+    /// <summary>
+    /// 子要素がホバーしているか
+    /// </summary>
+    public bool IsChildrenHovering { get; private set; } = false;
 
     /// <summary>
     /// UIのX座標
@@ -58,12 +67,22 @@ public class UIElement : IDisposable
     /// <summary>
     /// UIのWindow内での絶対X座標
     /// </summary>
-    public int AbsoluteX { get => Super != null ? Super.X + X : X; }
+    public int AbsoluteX { get => Super != null ? Super.AbsoluteX + X : X; }
 
     /// <summary>
     /// UIのWindow内での絶対Y座標
     /// </summary>
-    public int AbsoluteY { get => Super != null ? Super.Y + Y : Y; }
+    public int AbsoluteY { get => Super != null ? Super.AbsoluteY + Y : Y; }
+
+    /// <summary>
+    /// UIの相対X座標
+    /// </summary>
+    public int RelativeX { get; private set; }
+
+    /// <summary>
+    /// UIの絶対Y座標
+    /// </summary>
+    public int RelativeY { get; private set; }
 
     private int _width;
     /// <summary>
@@ -201,11 +220,12 @@ public class UIElement : IDisposable
             IsBuild = false;
         }
 
-        foreach(var child in ChildrenList)
+        foreach (var child in ChildrenList)
         {
             child.Update(deltaTime);
             child.Super = this;
-            _isChildHovering = child.IsHovering();
+
+            IsChildrenHovering = child.IsChildrenHovering ? true : child.IsHovering();
         }
 
         CallInputEvent();
@@ -255,16 +275,27 @@ public class UIElement : IDisposable
     /// </summary>
     public bool IsHovering()
     {
-        if (!IsInput || !_isWindowActive || _isChildHovering)
+        if (!IsInput || !IsDisplayInput || !_isWindowActive || IsChildrenHovering)
             return false;
 
         SDL.SDL_GetWindowPosition(WindowPtr, out int x, out int y);
         (int mouseX, int mouseY) = (Mouse.X - x, Mouse.Y - y);
+        (int width, int height) = (AbsoluteX + Width, AbsoluteY + Height);
+
+        // 自分が子要素の場合、はみ出た部分の判定をなくす
+        if(Super != null)
+        {
+            if(X + Width >= Super.Width)
+                width -= (X + Width) - Super.Width;
+
+            if (Y + Height >= Super.Height)
+                height -= (Y + Height) - Super.Height;
+        }
 
         if (mouseX >= AbsoluteX
             && mouseY >= AbsoluteY
-            && mouseX <= AbsoluteX + Width
-            && mouseY <= AbsoluteY + Height)
+            && mouseX <= width
+            && mouseY <= height)
             return true;
 
         return false;
@@ -350,7 +381,7 @@ public class UIElement : IDisposable
     /// <summary>
     /// イベントを処理する
     /// </summary>
-    /// <param name="e">イベント</param>
+    /// <param name="e">SDLイベント</param>
     protected virtual void UpdatingUIEvent(in SDL.SDL_Event e)
     {
         switch (e.type)

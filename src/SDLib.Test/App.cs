@@ -30,15 +30,6 @@ internal class App
         SDL_ttf.TTF_Init();
         SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG);
 
-        try
-        {
-            throw new Exception("Test");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.StackTrace);
-        }
-
         Init();
 
         bool isRunning = true;
@@ -67,6 +58,7 @@ internal class App
             deltaStopwatch.Restart();
         }
 
+        End();
         SDL.SDL_DestroyRenderer(Renderer);
         SDL.SDL_DestroyWindow(Window);
         SDL.SDL_Quit();
@@ -74,26 +66,63 @@ internal class App
         SDL_image.IMG_Quit();
     }
 
+    private readonly UIDisplay display = new();
     private UIButton? button;
-    private UILabel? label;
+    private UIButton? button2;
+    private UIButton? children;
+    private UIButton? children2;
+    private UIButton? children3;
 
     private void Init()
     {
         var family = new FontFamily("segoeui.ttf", 24, Color.DeepSkyBlue);
 
-        button = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(30, 30, 30))
+        children = new(Renderer, Window, 200, 200, family, Color.FromArgb(0, 0, 255), Color.FromArgb(0, 0, 0))
         {
-            X = 50,
-            Y = 50,
+            X = 30,
+            Y = 30,
             Text = string.Empty,
             Icon = new(Renderer, "beer-stein.png"),
         };
 
-        label = new(Renderer, Window, 200, 50, family)
+        children2 = new(Renderer, Window, 150, 150, family, Color.FromArgb(255, 0, 255), Color.FromArgb(0, 0, 0))
         {
-            X = 500,
-            Y = 50,
+            X = 10,
+            Y = 10,
+            Text = string.Empty,
+            Icon = new(Renderer, "beer-stein.png"),
         };
+
+        children3 = new(Renderer, Window, 30, 30, family, Color.FromArgb(0, 255, 255), Color.FromArgb(0, 0, 0))
+        {
+            X = 10,
+            Y = 10,
+            Text = string.Empty,
+            Icon = new(Renderer, "beer-stein.png"),
+        };
+
+        button = new(Renderer, Window, 200, 200, family, Color.FromArgb(255, 0, 0), Color.FromArgb(0, 0, 0))
+        {
+            X = 70,
+            Y = 60,
+            Text = string.Empty,
+            Icon = new(Renderer, "beer-stein.png"),
+        };
+
+        button2 = new(Renderer, Window, 200, 200, family, Color.FromArgb(0, 255, 0), Color.FromArgb(0, 0, 0))
+        {
+            X = 80,
+            Y = 80,
+            Text = string.Empty,
+            Icon = new(Renderer, "beer-stein.png"),
+        };
+
+        children2.ChildrenList.Add(children3);
+        children.ChildrenList.Add(children2);
+        button.ChildrenList.Add(children);
+
+        display.AddElement(button2);
+        display.AddElement(button);
     }
 
     private void Loop()
@@ -101,22 +130,19 @@ internal class App
         Mouse.Update();
         Keyboard.Update();
 
-        button?.Update(DeltaTime);
-        button?.Render();
 
-        label?.Update(DeltaTime);
-        label?.Render();
+
+        display.Update(DeltaTime);
+        display.Render();
     }
 
     private void EventLoop(in SDL.SDL_Event e)
     {
-        button?.UpdateEvent(e);
-        label?.UpdateEvent(e);
+        display.EventUpdate(e);
     }
 
     private void End()
     {
-        button?.Dispose();
-        label?.Dispose();
+        display.Dispose();
     }
 }
