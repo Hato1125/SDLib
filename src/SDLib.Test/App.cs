@@ -67,62 +67,65 @@ internal class App
     }
 
     private readonly UIDisplay display = new();
+    private UITileAlignment? tile;
     private UIButton? button;
     private UIButton? button2;
-    private UIButton? children;
-    private UIButton? children2;
-    private UIButton? children3;
+    private UIButton? button3;
+    private UIButton? button4;
+    private UIButton? button5;
+    private UIButton? button6;
+    private UIButton? button7;
 
     private void Init()
     {
         var family = new FontFamily("segoeui.ttf", 24, Color.DeepSkyBlue);
 
-        children = new(Renderer, Window, 200, 200, family, Color.FromArgb(0, 0, 255), Color.FromArgb(0, 0, 0))
+        tile = new(Renderer, Window, 1000, 1000, 2)
         {
-            X = 30,
-            Y = 30,
-            Text = string.Empty,
-            Icon = new(Renderer, "beer-stein.png"),
+            ColumnPadding = 10,
+            RowPadding = 10,
+            X = 0,
+            Y = 0,
         };
 
-        children2 = new(Renderer, Window, 150, 150, family, Color.FromArgb(255, 0, 255), Color.FromArgb(0, 0, 0))
+        button = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
         {
-            X = 10,
-            Y = 10,
             Text = string.Empty,
-            Icon = new(Renderer, "beer-stein.png"),
+        };
+        button2 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+        {
+            Text = string.Empty,
+        };
+        button3 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+        {
+            Text = string.Empty,
+        };
+        button4 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+        {
+            Text = string.Empty,
+        };
+        button5 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+        {
+            Text = string.Empty,
+        };
+        button6 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+        {
+            Text = string.Empty,
+        };
+        button7 = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+        {
+            Text = string.Empty,
         };
 
-        children3 = new(Renderer, Window, 30, 30, family, Color.FromArgb(0, 255, 255), Color.FromArgb(0, 0, 0))
-        {
-            X = 10,
-            Y = 10,
-            Text = string.Empty,
-            Icon = new(Renderer, "beer-stein.png"),
-        };
+        tile.ChildrenList.Add(button);
+        tile.ChildrenList.Add(button2);
+        tile.ChildrenList.Add(button3);
+        tile.ChildrenList.Add(button4);
+        tile.ChildrenList.Add(button5);
+        tile.ChildrenList.Add(button6);
+        tile.ChildrenList.Add(button7);
 
-        button = new(Renderer, Window, 200, 200, family, Color.FromArgb(255, 0, 0), Color.FromArgb(0, 0, 0))
-        {
-            X = 70,
-            Y = 60,
-            Text = string.Empty,
-            Icon = new(Renderer, "beer-stein.png"),
-        };
-
-        button2 = new(Renderer, Window, 200, 200, family, Color.FromArgb(0, 255, 0), Color.FromArgb(0, 0, 0))
-        {
-            X = 80,
-            Y = 80,
-            Text = string.Empty,
-            Icon = new(Renderer, "beer-stein.png"),
-        };
-
-        children2.ChildrenList.Add(children3);
-        children.ChildrenList.Add(children2);
-        button.ChildrenList.Add(children);
-
-        display.AddElement(button2);
-        display.AddElement(button);
+        display.AddElement(tile);
     }
 
     private void Loop()
@@ -130,7 +133,11 @@ internal class App
         Mouse.Update();
         Keyboard.Update();
 
+        if (Keyboard.IsPushed(SDL.SDL_Scancode.SDL_SCANCODE_DOWN))
+            tile.ColumnElementMaxNum--;
 
+        if (Keyboard.IsPushed(SDL.SDL_Scancode.SDL_SCANCODE_UP))
+            tile.ColumnElementMaxNum++;
 
         display.Update(DeltaTime);
         display.Render();
