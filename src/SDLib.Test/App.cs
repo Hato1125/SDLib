@@ -10,7 +10,7 @@ namespace SDLib.Test;
 internal class App
 {
     public readonly Stopwatch deltaStopwatch = new();
-    public readonly SDL.SDL_WindowFlags WindowFlags = SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN;
+    public readonly SDL.SDL_WindowFlags WindowFlags = SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
     public readonly SDL.SDL_RendererFlags RendererFlags = SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
     public const int WIDTH = 800;
     public const int HEIGHT = 800;
@@ -69,24 +69,29 @@ internal class App
     private readonly UIDisplay display = new();
     private UITileAlignment? tile;
     private UIButton[]? button;
+    private UIScroller scorll = new(0, -100, 100)
+    {
+        ScrollLine = 10,
+    };
 
     private void Init()
     {
-        var family = new FontFamily("segoeui.ttf", 15, Color.White);
+        var family = new FontFamily("segoeui.ttf", 30, Color.White);
 
-        tile = new(Renderer, Window, 1000, 1000, 2)
+        tile = new(Renderer, Window, 440, 1000, 2)
         {
-            ColumnPadding = 0,
-            RowPadding = 0,
+            ColumnElementMaxNum = 5,
+            ColumnPadding = 10,
+            RowPadding = 10,
             X = 0,
             Y = 0,
         };
 
-        button = new UIButton[270];
+        button = new UIButton[200];
 
         for (int i = 0; i < button.Length; i++)
         {
-            button[i] = new(Renderer, Window, 50, 50, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+            button[i] = new(Renderer, Window, 80, 80, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
             {
                 Text = "Aka",
             };
@@ -114,6 +119,7 @@ internal class App
     private void EventLoop(in SDL.SDL_Event e)
     {
         display.EventUpdate(e);
+        scorll.UpdateEvent(e);
     }
 
     private void End()

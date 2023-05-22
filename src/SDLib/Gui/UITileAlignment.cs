@@ -1,7 +1,25 @@
-﻿namespace SDLib.Gui;
+﻿using SDL2;
+
+namespace SDLib.Gui;
 
 public class UITileAlignment : UIElement
 {
+    #region Private Member
+
+    private bool _isScroll;
+
+    #endregion
+
+    #region Public Member
+
+    /// <summary>
+    /// Scroller
+    /// </summary>
+    public readonly UIScroller Scroller;
+
+    /// <summary>
+    /// 整列するか
+    /// </summary>
     public bool IsAlignment { get; set; }
 
     private int _columnElementMaxNum;
@@ -50,6 +68,8 @@ public class UITileAlignment : UIElement
         }
     }
 
+    #endregion
+
     /// <summary>
     /// UITileAlignmentを初期化する
     /// </summary>
@@ -61,10 +81,22 @@ public class UITileAlignment : UIElement
     public UITileAlignment(nint rendererPtr, nint windowPtr, int width, int height, int columnMaxElementNum)
         : base(rendererPtr, windowPtr, width, height)
     {
+        Scroller = new(0, 0, 0) { ScrollLine = 25 };
         ColumnElementMaxNum = columnMaxElementNum;
         ColumnPadding = 5;
         RowPadding = 5;
         OnUIUpdating += AlignmentTile;
+    }
+
+    protected override void UpdatingUIEvent(in SDL.SDL_Event e)
+    {
+        if (_isScroll)
+        {
+            Scroller.UpdateEvent(e);
+            IsAlignment = true;
+        }
+
+        base.UpdatingUIEvent(e);
     }
 
     void AlignmentTile(double deltaTime)
@@ -75,6 +107,7 @@ public class UITileAlignment : UIElement
         int columnMaxWidth = default;
         int columnWidth = default;
         int rowMaxHeight = default;
+        int maxHeight = default;
         int width = _columnElementMaxNum;
         int height = ChildrenList.Count / _columnElementMaxNum + ChildrenList.Count % _columnElementMaxNum;
 
@@ -86,12 +119,12 @@ public class UITileAlignment : UIElement
                 var index = count != 0 ? j + (width * i) : 0;
                 var rowHeight = (rowMaxHeight + RowPadding) * i;
 
-                // indexが要素の個数を超えていない場合はセットする
+                // indexが要素の個数を超えていない場合は処理する
                 if (index <= ChildrenList.Count - 1)
                 {
                     var element = ChildrenList[index];
                     element.X = columnWidth - columnMaxWidth;
-                    element.Y = rowHeight;
+                    element.Y = rowHeight + Scroller.ScrollValue;
 
                     columnWidth += element.Width + ColumnPadding;
 
@@ -99,7 +132,23 @@ public class UITileAlignment : UIElement
                         rowMaxHeight = element.Height;
                 }
             }
+            maxHeight += rowMaxHeight + RowPadding;
             columnMaxWidth = columnWidth;
+        }
+
+        // 次のフレームでスクロールする必要があるかを判定する
+        maxHeight -= RowPadding;
+        if(maxHeight > Height)
+        {
+            _isScroll = true;
+
+            var diff = maxHeight - Height;
+            Scroller.ScrollMin = -diff;
+            Scroller.ScrollMax = 0;
+        }
+        else
+        {
+            _isScroll = false;
         }
 
         IsAlignment = false;

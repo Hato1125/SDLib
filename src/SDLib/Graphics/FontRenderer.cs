@@ -55,7 +55,7 @@ public class FontRenderer : ITextureReturnable, IDisposable
     /// <param name="renderer">Renderer</param>
     /// <param name="window">Window</param>
     /// <param name="fontFamily">フォントファミリー</param>
-    public FontRenderer(IntPtr renderer, IntPtr window, FontFamily fontFamily)
+    public FontRenderer(IntPtr renderer, IntPtr window, in FontFamily fontFamily)
         : this(renderer, window)
     {
         _rendererPtr = renderer;

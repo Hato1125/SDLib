@@ -28,7 +28,7 @@ public class UIElement : IDisposable
     /// <summary>
     /// UIの描画可能領域
     /// </summary>
-    protected TextureArea? TextureArea;
+    protected TextureArea? TextureArea { get; set; }
 
     #endregion
 
@@ -214,7 +214,7 @@ public class UIElement : IDisposable
     /// </summary>
     public void Update(double deltaTime)
     {
-        if(IsBuild)
+        if (IsBuild)
         {
             UIBuild();
             IsBuild = false;
@@ -387,12 +387,16 @@ public class UIElement : IDisposable
         switch (e.type)
         {
             case SDL.SDL_EventType.SDL_WINDOWEVENT:
-                _isWindowActive = e.window.windowEvent switch
+                switch (e.window.windowEvent)
                 {
-                    SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED => true,
-                    SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST => false,
-                    _ => _isWindowActive
-                };
+                    case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
+                        _isWindowActive = true;
+                        break;
+
+                    case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
+                        _isWindowActive = false;
+                        break;
+                }
                 break;
         }
     }
