@@ -11,6 +11,7 @@ public class UIButton : UIElement
 
     private double _fadeCounter;
     private bool _isFade;
+    private bool _isColorUpdate;
 
     #endregion
 
@@ -45,15 +46,33 @@ public class UIButton : UIElement
     /// </summary>
     public double FadeMs { get; set; }
 
+    private Color _backColor;
     /// <summary>
     /// 背景色
     /// </summary>
-    public Color BackColor { get; set; }
+    public Color BackColor
+    {
+        get => _backColor;
+        set
+        {
+            _backColor = value;
+            _isColorUpdate = true;
+        }
+    }
 
+    private Color _clickColor;
     /// <summary>
     /// クリック時の背景色
     /// </summary>
-    public Color ClickColor { get; set; }
+    public Color ClickColor
+    {
+        get => _clickColor;
+        set
+        {
+            _clickColor = value;
+            _isColorUpdate = true;
+        }
+    }
 
     public int TextHorizontalOffset { get; set; }
     public int TextVerticalOffset { get; set; }
@@ -150,7 +169,7 @@ public class UIButton : UIElement
             }
         }
 
-        if (_isFade)
+        if (_isFade || _isColorUpdate)
         {
             var sin = Math.Sin(_fadeCounter * Math.PI / 180);
             var r = BackColor.R + (int)(sin * (ClickColor.R - BackColor.R));
@@ -161,6 +180,8 @@ public class UIButton : UIElement
             IsExceed(ref b);
 
             Rectangle.Color = Color.FromArgb(r, g, b);
+
+            _isColorUpdate = false;
         }
     }
 
