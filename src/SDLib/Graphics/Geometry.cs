@@ -27,6 +27,7 @@ public class Geometry
         if (renderer == IntPtr.Zero)
             throw new ArgumentNullException(nameof(renderer), "An invalid pointer was passed.");
 
+        _renderer = renderer;
         Vertexs = vertexs;
         if(vertexIndex != null)
         {

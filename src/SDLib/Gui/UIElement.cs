@@ -1,6 +1,7 @@
 ﻿using SDL2;
 using SDLib.Input;
 using SDLib.Graphics;
+using System.Runtime.CompilerServices;
 
 namespace SDLib.Gui;
 
@@ -225,7 +226,7 @@ public class UIElement : IDisposable
             child.Update(deltaTime);
             child.Super = this;
 
-            IsChildrenHovering = child.IsChildrenHovering ? true : child.IsHovering();
+            IsChildrenHovering = child.IsChildrenHovering || child.IsHovering();
         }
 
         CallInputEvent();
@@ -275,7 +276,10 @@ public class UIElement : IDisposable
     /// </summary>
     public bool IsHovering()
     {
-        if (!IsInput || !IsDisplayInput || !_isWindowActive || IsChildrenHovering)
+        if (!IsInput
+            || !IsDisplayInput
+            || !_isWindowActive
+            || IsChildrenHovering)
             return false;
 
         SDL.SDL_GetWindowPosition(WindowPtr, out int x, out int y);
@@ -283,9 +287,9 @@ public class UIElement : IDisposable
         (int width, int height) = (AbsoluteX + Width, AbsoluteY + Height);
 
         // 自分が子要素の場合、はみ出た部分の判定をなくす
-        if(Super != null)
+        if (Super != null)
         {
-            if(X + Width >= Super.Width)
+            if (X + Width >= Super.Width)
                 width -= (X + Width) - Super.Width;
 
             if (Y + Height >= Super.Height)
@@ -304,53 +308,23 @@ public class UIElement : IDisposable
     /// <summary>
     /// UIが押されているかを取得する
     /// </summary>
-    public bool IsPushing()
-    {
-        if (!IsHovering())
-            return false;
-
-        if (Mouse.IsPushing(SDL.SDL_BUTTON_LEFT))
-            return true;
-
-        foreach(var keyCode in KeyCodeList)
-            return Keyboard.IsPushing(keyCode);
-
-        return false;
-    }
+    /// <param name="device">取得する入力デバイス</param>
+    public bool IsPushing(InputDevice device = InputDevice.All)
+        => IsHovering() && GetInputDeviceState(device, InputType.Pushing);
 
     /// <summary>
     /// UIが押された瞬間を取得する
     /// </summary>
-    public bool IsPushed()
-    {
-        if (!IsHovering())
-            return false;
-
-        if (Mouse.IsPushed(SDL.SDL_BUTTON_LEFT))
-            return true;
-
-        foreach (var keyCode in KeyCodeList)
-            return Keyboard.IsPushed(keyCode);
-
-        return false;
-    }
+    /// <param name="device">取得する入力デバイス</param>
+    public bool IsPushed(InputDevice device = InputDevice.All)
+        => IsHovering() && GetInputDeviceState(device, InputType.Pushed);
 
     /// <summary>
     /// UIが離された瞬間を取得する
     /// </summary>
-    public bool IsSeparate()
-    {
-        if (!IsHovering())
-            return false;
-
-        if (Mouse.IsSeparate(SDL.SDL_BUTTON_LEFT))
-            return true;
-
-        foreach (var keyCode in KeyCodeList)
-            return Keyboard.IsSeparate(keyCode);
-
-        return false;
-    }
+    /// <param name="device">取得する入力デバイス</param>
+    public bool IsSeparate(InputDevice device = InputDevice.All)
+        => IsHovering() && GetInputDeviceState(device, InputType.Separate);
 
     /// <summary>
     /// UIの破棄を行う
@@ -416,5 +390,50 @@ public class UIElement : IDisposable
         if (IsPushing()) OnPushing?.Invoke();
         if (IsPushed()) OnPushed?.Invoke();
         if (IsSeparate()) OnSeparate?.Invoke();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool GetInputDeviceState(InputDevice device, InputType type)
+    {
+        if (device == InputDevice.Mouse || device == InputDevice.All)
+        {
+            return type switch
+            {
+                InputType.Pushing => Mouse.IsPushing(SDL.SDL_BUTTON_LEFT),
+                InputType.Pushed => Mouse.IsPushed(SDL.SDL_BUTTON_LEFT),
+                InputType.Separate => Mouse.IsSeparate(SDL.SDL_BUTTON_LEFT),
+                _ => false
+            };
+        }
+
+        if (device == InputDevice.Keyboard || device == InputDevice.All)
+        {
+            foreach(var keyCode in KeyCodeList)
+            {
+                return type switch
+                {
+                    InputType.Pushing => Keyboard.IsPushing(keyCode),
+                    InputType.Pushed => Keyboard.IsPushed(keyCode),
+                    InputType.Separate => Keyboard.IsSeparate(keyCode),
+                    _ => false
+                };
+            }
+        }
+
+        return false;
+    }
+
+    public enum InputDevice
+    {
+        Keyboard,
+        Mouse,
+        All,
+    }
+
+    private enum InputType
+    {
+        Pushing,
+        Pushed,
+        Separate,
     }
 }

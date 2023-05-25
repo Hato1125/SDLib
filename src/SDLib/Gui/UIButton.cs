@@ -10,8 +10,8 @@ public class UIButton : UIElement
     #region Private Member
 
     private double _fadeCounter;
-    private bool _isFade;
     private bool _isColorUpdate;
+    private bool _isFade;
 
     #endregion
 
@@ -150,6 +150,9 @@ public class UIButton : UIElement
             {
                 _fadeCounter += deltaTime * (90 / FadeMs);
                 _isFade = true;
+
+                if (_fadeCounter > 90)
+                    _fadeCounter = 90;
             }
             else
             {
@@ -162,6 +165,9 @@ public class UIButton : UIElement
             {
                 _fadeCounter -= deltaTime * (90 / FadeMs);
                 _isFade = true;
+
+                if(_fadeCounter < 0)
+                    _fadeCounter = 0;
             }
             else
             {
@@ -175,9 +181,6 @@ public class UIButton : UIElement
             var r = BackColor.R + (int)(sin * (ClickColor.R - BackColor.R));
             var g = BackColor.G + (int)(sin * (ClickColor.G - BackColor.G));
             var b = BackColor.B + (int)(sin * (ClickColor.B - BackColor.B));
-            IsExceed(ref r);
-            IsExceed(ref g);
-            IsExceed(ref b);
 
             Rectangle.Color = Color.FromArgb(r, g, b);
 
@@ -210,13 +213,5 @@ public class UIButton : UIElement
 
             Icon.Render(iconPosition.X, iconPosition.Y);
         }
-    }
-
-    private static void IsExceed(ref int color)
-    {
-        if (color > 255)
-            color = 255;
-        else if (color < 0)
-            color = 0;
     }
 }
