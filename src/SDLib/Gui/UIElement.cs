@@ -312,7 +312,7 @@ public class UIElement : IDisposable
     /// UIが押されているかを取得する
     /// </summary>
     /// <param name="device">取得する入力デバイス</param>
-    public bool IsPushing(InputDevice device = InputDevice.Mouse)
+    public bool IsPushing(InputDevice device = InputDevice.All)
         => IsHovering() && GetInputDeviceState(device, InputType.Pushing);
 
     /// <summary>
