@@ -312,7 +312,7 @@ public class UIElement : IDisposable
     /// UIが押されているかを取得する
     /// </summary>
     /// <param name="device">取得する入力デバイス</param>
-    public bool IsPushing(InputDevice device = InputDevice.All)
+    public bool IsPushing(InputDevice device = InputDevice.Mouse)
         => IsHovering() && GetInputDeviceState(device, InputType.Pushing);
 
     /// <summary>
@@ -400,13 +400,18 @@ public class UIElement : IDisposable
     {
         if (device == InputDevice.Mouse || device == InputDevice.All)
         {
-            return type switch
+            var result = type switch
             {
                 InputType.Pushing => Mouse.IsPushing(SDL.SDL_BUTTON_LEFT),
                 InputType.Pushed => Mouse.IsPushed(SDL.SDL_BUTTON_LEFT),
                 InputType.Separate => Mouse.IsSeparate(SDL.SDL_BUTTON_LEFT),
                 _ => false
             };
+
+            if (device != InputDevice.All)
+                return result;
+            else if (result)
+                return result;
         }
 
         if (device == InputDevice.Keyboard || device == InputDevice.All)
