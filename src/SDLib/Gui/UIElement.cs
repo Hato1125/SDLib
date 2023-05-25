@@ -240,6 +240,9 @@ public class UIElement : IDisposable
     public void UpdateEvent(in SDL.SDL_Event e)
     {
         UpdatingUIEvent(e);
+
+        foreach (var child in ChildrenList)
+            child.UpdateEvent(e);
     }
 
     /// <summary>
