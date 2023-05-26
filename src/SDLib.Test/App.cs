@@ -68,7 +68,7 @@ internal class App
 
     private readonly UIDisplay display = new();
     private UITileAlignment? tile;
-    private UIButton[]? button;
+    private UIToggleButton[]? button;
     private UIScroller scorll = new(0, -100, 100)
     {
         ScrollLine = 10,
@@ -76,9 +76,9 @@ internal class App
 
     private void Init()
     {
-        var family = new FontFamily("segoeui.ttf", 30, Color.White);
+        var family = new FontFamily("segoeui.ttf", 20, Color.Red, FontStyle.Bold);
 
-        tile = new(Renderer, Window, 440, 1000, 2)
+        tile = new(Renderer, Window, 1000, 1000, 2)
         {
             ColumnElementMaxNum = 5,
             ColumnPadding = 10,
@@ -87,13 +87,15 @@ internal class App
             Y = 0,
         };
 
-        button = new UIButton[200];
+        button = new UIToggleButton[200];
 
         for (int i = 0; i < button.Length; i++)
         {
-            button[i] = new(Renderer, Window, 80, 80, family, Color.FromArgb(0, 0, 0), Color.FromArgb(255, 0, 0))
+            button[i] = new(Renderer, Window, 120, 50, family)
             {
-                Text = "Aka",
+                BackColor = Color.Black,
+                ClickColor = Color.Blue,
+                Text = "Akasoko"
             };
             tile.ChildrenList.Add(button[i]);
         }
