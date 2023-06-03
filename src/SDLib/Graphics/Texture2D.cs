@@ -8,7 +8,8 @@ public class Texture2D : ITextureReturnable, IDisposable
     private readonly IntPtr _rendererPtr = IntPtr.Zero;
     private IntPtr _surfacePtr = IntPtr.Zero;
     private IntPtr _texturePtr = IntPtr.Zero;
-    private SDL.SDL_FRect _renderRect;
+    private SDL.SDL_Rect _imageRect;
+    private SDL.SDL_FRect _drawRect;
 
     /// <summary>
     /// 画像の横幅
@@ -165,19 +166,26 @@ public class Texture2D : ITextureReturnable, IDisposable
     /// </summary>
     /// <param name="x">X座標</param>
     /// <param name="y">Y座標</param>
-    public void Render(float x, float y)
+    public void Render(float x, float y, System.Drawing.Rectangle? rectangle = null)
     {
+        if (rectangle == null)
+            rectangle = new(0, 0, Width, Height);
+
         var rotationPoint = CalcRotationPoint();
         var renderPoint = CalcRenderPoint();
-        _renderRect.x = x - renderPoint.X;
-        _renderRect.y = y - renderPoint.Y;
-        _renderRect.w = Width * WidthScale;
-        _renderRect.h = Height * HeightScale;
+        _imageRect.x = rectangle.Value.X;
+        _imageRect.y = rectangle.Value.Y;
+        _imageRect.w = rectangle.Value.Width;
+        _imageRect.h = rectangle.Value.Height;
+        _drawRect.x = x + renderPoint.X + rectangle.Value.X;
+        _drawRect.y = y + renderPoint.Y + rectangle.Value.Y;
+        _drawRect.w = (rectangle.Value.Width - rectangle.Value.X) * WidthScale;
+        _drawRect.h = (rectangle.Value.Height - rectangle.Value.Y) * HeightScale;
 
         SDL.SDL_SetTextureBlendMode(_texturePtr, BlendMode);
         SDL.SDL_SetTextureAlphaMod(_texturePtr, AlphaMod);
         SDL.SDL_SetTextureColorMod(_texturePtr, Brightness.R, Brightness.G, Brightness.B);
-        SDL.SDL_RenderCopyExF(_rendererPtr, _texturePtr, IntPtr.Zero, ref _renderRect, Rotation, ref rotationPoint, RenderFlip);
+        SDL.SDL_RenderCopyExF(_rendererPtr, _texturePtr, ref _imageRect, ref _drawRect, Rotation, ref rotationPoint, RenderFlip);
     }
 
     /// <summary>

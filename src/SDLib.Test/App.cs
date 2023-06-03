@@ -66,66 +66,36 @@ internal class App
         SDL_image.IMG_Quit();
     }
 
-    private readonly UIDisplay display = new();
-    private UITileAlignment? tile;
-    private UIToggleButton[]? button;
-    private UIScroller scorll = new(0, -100, 100)
-    {
-        ScrollLine = 10,
-    };
+    public Texture2D Texture;
 
     private void Init()
     {
-        var family = new FontFamily("segoeui.ttf", 20, Color.Red, FontStyle.Bold);
-
-        tile = new(Renderer, Window, 1000, 1000, 2)
-        {
-            ColumnElementMaxNum = 5,
-            ColumnPadding = 10,
-            RowPadding = 10,
-            X = 0,
-            Y = 0,
-        };
-
-        button = new UIToggleButton[200];
-
-        for (int i = 0; i < button.Length; i++)
-        {
-            button[i] = new(Renderer, Window, 120, 50, family)
-            {
-                BackColor = Color.Black,
-                ClickColor = Color.Blue,
-                Text = "Akasoko"
-            };
-            tile.ChildrenList.Add(button[i]);
-        }
-
-        display.AddElement(tile);
+        Texture = new(Renderer, "test.png");
     }
+
+    private double counter = 100;
+    private double counter2 = 0;
 
     private void Loop()
     {
+        counter += 0.01;
+        if (counter >= 500)
+        {
+            counter = 500;
+            counter2 += 0.01;
+        }
+
         Mouse.Update();
         Keyboard.Update();
 
-        if (Keyboard.IsPushed(SDL.SDL_Scancode.SDL_SCANCODE_DOWN))
-            tile.ColumnElementMaxNum--;
-
-        if (Keyboard.IsPushed(SDL.SDL_Scancode.SDL_SCANCODE_UP))
-            tile.ColumnElementMaxNum++;
-
-        display.Update(DeltaTime);
-        display.Render();
+        Texture.Render(100, 100, new((int)counter2, (int)counter2, (int)counter, (int)counter));
     }
 
     private void EventLoop(in SDL.SDL_Event e)
     {
-        display.EventUpdate(e);
-        scorll.UpdateEvent(e);
     }
 
     private void End()
     {
-        display.Dispose();
     }
 }

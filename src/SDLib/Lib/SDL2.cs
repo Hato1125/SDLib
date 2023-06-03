@@ -3088,6 +3088,38 @@ namespace SDL2
         );
 
         /* renderer refers to an SDL_Renderer*, texture to an SDL_Texture*.
+        * Internally, this function contains logic to use default values when
+        * source, destination, and/or center are passed as NULL.
+        * This overload allows for IntPtr.Zero (null) to be passed for dstrect.
+         */
+        [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SDL_RenderCopyExF(
+            IntPtr renderer,
+            IntPtr texture,
+            ref SDL_Rect srcrect,
+            ref SDL_FRect drcrect,
+            double angle,
+            ref SDL_FPoint center,
+            SDL_RendererFlip flip
+        );
+
+        /* renderer refers to an SDL_Renderer*, texture to an SDL_Texture*.
+        * Internally, this function contains logic to use default values when
+        * source, destination, and/or center are passed as NULL.
+        * This overload allows for IntPtr.Zero (null) to be passed for dstrect.
+         */
+        [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SDL_RenderCopyExF(
+            IntPtr renderer,
+            IntPtr texture,
+            ref SDL_Rect srcrect,
+            ref SDL_Rect dstrect,
+            double angle,
+            ref SDL_FPoint center,
+            SDL_RendererFlip flip
+        );
+
+        /* renderer refers to an SDL_Renderer*, texture to an SDL_Texture*.
 		 * Internally, this function contains logic to use default values when
 		 * source, destination, and/or center are passed as NULL.
 		 * This overload allows for IntPtr.Zero (null) to be passed for center.
